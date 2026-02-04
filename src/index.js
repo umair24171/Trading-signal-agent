@@ -103,7 +103,7 @@ _Scanning for opportunities..._
     const lastSignal = this.lastSignals.get(candle.symbol);
     if (lastSignal) {
       const timeDiff = Date.now() - lastSignal.timestamp;
-      if (timeDiff < 30 * 60 * 1000 && lastSignal.action === signal.action) {
+      if (timeDiff < 10 * 60 * 1000 && lastSignal.action === signal.action) {
         return; // Skip duplicate
       }
     }
