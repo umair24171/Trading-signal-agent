@@ -3,6 +3,20 @@ import { MarketDataService } from './services/MarketDataService.js';
 import { SignalEngine } from './engine/SignalEngine.js';
 import { TelegramService } from './services/TelegramService.js';
 import { MT5Bridge } from './services/MT5Bridge.js';
+import http from 'http';
+
+// Add this simple server to keep Render happy
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ 
+    status: 'running', 
+    agent: 'Trading Signal Agent',
+    uptime: process.uptime()
+  }));
+}).listen(PORT, () => {
+  console.log(`🌐 Health server running on port ${PORT}`);
+});
 
 dotenv.config();
 
