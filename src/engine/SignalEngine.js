@@ -5,6 +5,12 @@ export class SignalEngine {
     this.candleStore = new Map(); // symbol -> candles[]
   }
 
+  // Method to bulk load historical candles without triggering analysis
+  loadHistoricalCandles(symbol, candles) {
+    this.candleStore.set(symbol, [...candles]);
+    console.log(`   📊 SignalEngine: Loaded ${candles.length} historical candles for ${symbol}`);
+  }
+
   addCandle(candle) {
     if (!this.candleStore.has(candle.symbol)) {
       this.candleStore.set(candle.symbol, []);

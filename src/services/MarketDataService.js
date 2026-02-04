@@ -46,12 +46,16 @@ export class MarketDataService extends EventEmitter {
     await this.fetchHistoricalData();
 
     // Start polling for new candles
+    await this.startPolling();
+  }
+
+  async startPolling() {
     const intervalMs = this.getIntervalMs();
     console.log(`⏱ Polling every ${intervalMs / 1000} seconds`);
     console.log(`💡 Tip: For faster testing, set TIMEFRAME=1m in .env\n`);
 
-    // Immediately do first analysis after loading history
-    console.log('🔍 Running initial analysis...\n');
+    // Immediately fetch and analyze first real-time candle
+    console.log('🔍 Fetching first real-time candle...\n');
     await this.fetchLatestCandles();
 
     this.pollInterval = setInterval(() => {
@@ -95,8 +99,8 @@ export class MarketDataService extends EventEmitter {
           this.candleBuffers.set(symbol, candles);
           console.log(`   ✅ Loaded ${candles.length} candles for ${symbol} (Price: ${candles[candles.length-1].close})`);
 
-          // Emit historical candles for analysis warmup
-          candles.forEach(c => this.emit('candle', c));
+          // Add candles to buffer for indicator warmup, but don't emit signals
+          // Historical data should only be used to calculate indicators, not generate signals
         } else {
           console.error(`   ❌ No data for ${symbol}:`, JSON.stringify(response.data).slice(0, 200));
         }

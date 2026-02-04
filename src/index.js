@@ -61,7 +61,20 @@ class TradingAgent {
 _Scanning for opportunities..._
     `);
 
-    // Wire up events
+    // Load historical data first (for indicator warmup)
+    await this.marketData.fetchHistoricalData();
+
+    // Load historical candles into signal engine without triggering signals
+    for (const symbol of this.watchlist) {
+      const historicalCandles = this.marketData.getCandles(symbol);
+      if (historicalCandles.length > 0) {
+        this.signalEngine.loadHistoricalCandles(symbol, historicalCandles);
+      }
+    }
+
+    console.log('📊 Indicators warmed up with historical data\n');
+
+    // Wire up events for real-time candles only
     this.marketData.on('candle', (candle) => {
       this.processCandle(candle);
     });
@@ -70,10 +83,10 @@ _Scanning for opportunities..._
       console.error('❌ Market data error:', err.message);
     });
 
-    // Start market data feed
-    await this.marketData.start();
-    
-    console.log('✅ Agent running - waiting for signals...\n');
+    // Start real-time market data polling
+    await this.marketData.startPolling();
+
+    console.log('✅ Agent running - waiting for NEW candles and signals...\n');
   }
 
   async processCandle(candle) {
