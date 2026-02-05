@@ -183,14 +183,15 @@ export class SignalEngine {
     // ═══════════════════════════════════════════════════════════
 
     const netScore = buyScore - sellScore;
-    
+
     let action = 'HOLD';
     let confidence = 0;
 
-    if (netScore >= 40) {
+    // Lower threshold for signal generation (was 40, then 25, now 20)
+    if (netScore >= 20) {
       action = 'BUY';
       confidence = Math.min(Math.round(netScore), 100);
-    } else if (netScore <= -40) {
+    } else if (netScore <= -20) {
       action = 'SELL';
       confidence = Math.min(Math.round(Math.abs(netScore)), 100);
     }
