@@ -2,7 +2,6 @@ import axios from 'axios';
 
 export class TelegramService {
   constructor() {
-    // Check which service to use
     this.discordWebhook = process.env.DISCORD_WEBHOOK_URL;
     this.telegramToken = process.env.TELEGRAM_BOT_TOKEN;
     this.telegramChatId = process.env.TELEGRAM_CHAT_ID;
@@ -18,6 +17,20 @@ export class TelegramService {
     } else {
       this.enabled = false;
       console.warn('⚠️ No notification service configured');
+    }
+
+    this.retryCount = 3;
+  }
+
+  async sendWithRetry(fn, retries = 0) {
+    try {
+      await fn();
+    } catch (err) {
+      if (retries < this.retryCount) {
+        await new Promise(r => setTimeout(r, 2000 * (retries + 1)));
+        return this.sendWithRetry(fn, retries + 1);
+      }
+      console.error('❌ Notification send failed after retries:', err.message);
     }
   }
 
@@ -37,100 +50,182 @@ export class TelegramService {
   async sendDiscordSignal(signal) {
     const color = signal.action === 'BUY' ? 0x00ff00 : 0xff0000;
     const emoji = signal.action === 'BUY' ? '🟢' : '🔴';
+    const ctx = signal.context || {};
+    const warnings = signal.warnings || [];
+
+    const fields = [
+      { name: '📊 Symbol', value: `\`${signal.symbol}\``, inline: true },
+      { name: '💰 Entry Price', value: `\`${this.formatPrice(signal.price)}\``, inline: true },
+      { name: '📈 Confidence', value: `**${signal.confidence}%**`, inline: true },
+      { name: '🛑 Stop Loss', value: `\`${this.formatPrice(signal.stopLoss)}\``, inline: true },
+      { name: '🎯 Take Profit', value: `\`${this.formatPrice(signal.takeProfit)}\``, inline: true },
+      { name: '📊 Risk/Reward', value: `1:${signal.riskReward}`, inline: true },
+      { name: '🔗 Confluence', value: `${signal.confluenceCount || 0} signals confirming`, inline: true },
+      { name: '📈 Trend', value: `${ctx.trend || 'N/A'} (ADX: ${ctx.trendStrength?.toFixed(0) || 'N/A'})`, inline: true },
+      { name: '🌍 Session', value: ctx.session || 'N/A', inline: true },
+    ];
+
+    // Add indicators
+    fields.push({
+      name: '📉 Indicators',
+      value: [
+        `RSI: ${signal.indicators.rsi || 'N/A'}`,
+        `MACD: ${signal.indicators.macd || 'N/A'}`,
+        `ADX: ${signal.indicators.adx || 'N/A'}`,
+        `Stoch K: ${signal.indicators.stochK || 'N/A'}`,
+        `CCI: ${signal.indicators.cci || 'N/A'}`
+      ].join(' | '),
+      inline: false
+    });
+
+    // Add reasons
+    fields.push({
+      name: '✅ Reasons',
+      value: signal.reasons.map(r => `• ${r}`).join('\n') || 'N/A',
+      inline: false
+    });
+
+    // Add warnings if any
+    if (warnings.length > 0) {
+      fields.push({
+        name: '⚠️ Warnings',
+        value: warnings.join('\n'),
+        inline: false
+      });
+    }
+
+    // S/R levels
+    if (ctx.support && ctx.resistance) {
+      fields.push({
+        name: '📏 Key Levels',
+        value: `Support: \`${this.formatPrice(ctx.support)}\` | Resistance: \`${this.formatPrice(ctx.resistance)}\``,
+        inline: false
+      });
+    }
 
     const embed = {
       embeds: [{
-        title: `${emoji} ${signal.action} SIGNAL`,
-        color: color,
-        fields: [
-          { name: '📊 Symbol', value: `\`${signal.symbol}\``, inline: true },
-          { name: '💰 Price', value: `\`${this.formatPrice(signal.price)}\``, inline: true },
-          { name: '📈 Confidence', value: `${signal.confidence}%`, inline: true },
-          { name: '🛑 Stop Loss', value: `\`${this.formatPrice(signal.stopLoss)}\``, inline: true },
-          { name: '🎯 Take Profit', value: `\`${this.formatPrice(signal.takeProfit)}\``, inline: true },
-          { name: '📊 Risk/Reward', value: '1:1.5', inline: true },
-          { name: '📉 RSI', value: signal.indicators.rsi || 'N/A', inline: true },
-          { name: '📊 MACD', value: signal.indicators.macd || 'N/A', inline: true },
-          { name: '💪 ADX', value: signal.indicators.adx || 'N/A', inline: true },
-          { name: '📝 Reasons', value: signal.reasons.map(r => `• ${r}`).join('\n') || 'N/A', inline: false }
-        ],
+        title: `${emoji} ${signal.action} SIGNAL — ${signal.symbol}`,
+        color,
+        fields,
         footer: {
-          text: `⚠️ Not financial advice | ${process.env.MT5_ENABLED === 'true' ? '🤖 Auto-executing' : '👆 Manual execution'}`
+          text: `⚠️ Not financial advice | Regime: ${ctx.regime || 'N/A'} | Vol: ${ctx.volatility || 'N/A'}`
         },
         timestamp: new Date().toISOString()
       }]
     };
 
-    try {
+    await this.sendWithRetry(async () => {
       await axios.post(this.discordWebhook, embed);
       console.log('📱 Signal sent to Discord');
-    } catch (err) {
-      console.error('❌ Discord send failed:', err.message);
-    }
+    });
   }
 
   async sendTelegramSignal(signal) {
     const emoji = signal.action === 'BUY' ? '🟢' : '🔴';
-    const arrow = signal.action === 'BUY' ? '📈' : '📉';
+    const ctx = signal.context || {};
+    const warnings = signal.warnings || [];
 
-    const message = `
-${emoji} *${signal.action} SIGNAL* ${arrow}
+    let message = `
+${emoji} *${signal.action} SIGNAL* — \`${signal.symbol}\`
 
-*Symbol:* \`${signal.symbol}\`
-*Price:* \`${this.formatPrice(signal.price)}\`
-*Confidence:* ${signal.confidence}%
+💰 *Entry:* \`${this.formatPrice(signal.price)}\`
+📈 *Confidence:* ${signal.confidence}%
+🔗 *Confluence:* ${signal.confluenceCount || 0} signals
 
-*Targets:*
-🛑 Stop Loss: \`${this.formatPrice(signal.stopLoss)}\`
-🎯 Take Profit: \`${this.formatPrice(signal.takeProfit)}\`
-📊 Risk/Reward: 1:1.5
+🛑 *Stop Loss:* \`${this.formatPrice(signal.stopLoss)}\`
+🎯 *Take Profit:* \`${this.formatPrice(signal.takeProfit)}\`
+📊 *R/R:* 1:${signal.riskReward}
+
+*Market Context:*
+• Trend: ${ctx.trend || 'N/A'} (Strength: ${ctx.trendStrength?.toFixed(0) || 'N/A'})
+• Regime: ${ctx.regime || 'N/A'}
+• Session: ${ctx.session || 'N/A'}
+• Volatility: ${ctx.volatility || 'N/A'}
 
 *Indicators:*
-• RSI: ${signal.indicators.rsi}
-• MACD: ${signal.indicators.macd}
-• ADX: ${signal.indicators.adx}
+• RSI: ${signal.indicators.rsi} | MACD: ${signal.indicators.macd}
+• ADX: ${signal.indicators.adx} | Stoch: ${signal.indicators.stochK}
 
 *Reasons:*
-${signal.reasons.map(r => `• ${r}`).join('\n')}
+${signal.reasons.map(r => `✅ ${r}`).join('\n')}
+${warnings.length > 0 ? '\n*Warnings:*\n' + warnings.map(w => `${w}`).join('\n') : ''}
 
 ⏰ ${new Date().toLocaleString()}
-
-${process.env.MT5_ENABLED === 'true' ? '🤖 _Auto-executing on MT5..._' : '👆 _Manual execution required_'}
-
 ⚠️ _Not financial advice. Trade at your own risk._
     `;
 
-    try {
+    await this.sendWithRetry(async () => {
       await axios.post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
         chat_id: this.telegramChatId,
         text: message,
         parse_mode: 'Markdown'
       });
       console.log('📱 Signal sent to Telegram');
-    } catch (err) {
-      console.error('❌ Telegram send failed:', err.message);
-    }
+    });
   }
 
   async sendMessage(text) {
     if (!this.enabled) return;
 
     if (this.service === 'discord') {
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(this.discordWebhook, { content: text.replace(/\*/g, '**').replace(/_/g, '*') });
-      } catch (err) {
-        console.error('❌ Discord send failed:', err.message);
-      }
+      });
     } else {
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
           chat_id: this.telegramChatId,
-          text: text,
+          text,
           parse_mode: 'Markdown'
         });
-      } catch (err) {
-        console.error('❌ Telegram send failed:', err.message);
-      }
+      });
+    }
+  }
+
+  async sendDailyReport(report) {
+    if (!this.enabled) return;
+
+    if (this.service === 'discord') {
+      const embed = {
+        embeds: [{
+          title: '📊 Daily Trading Report',
+          color: 0x3498db,
+          fields: [
+            { name: '📈 Signals Today', value: `${report.totalSignals}`, inline: true },
+            { name: '🟢 Buy Signals', value: `${report.buySignals}`, inline: true },
+            { name: '🔴 Sell Signals', value: `${report.sellSignals}`, inline: true },
+            { name: '📊 Avg Confidence', value: `${report.avgConfidence}%`, inline: true },
+            { name: '🌐 API Credits', value: `${report.apiCreditsUsed}/${report.apiDailyLimit}`, inline: true },
+            { name: '💓 Uptime', value: `${report.uptime}`, inline: true }
+          ],
+          footer: { text: '🤖 Trading Signal Agent v2' },
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      await this.sendWithRetry(async () => {
+        await axios.post(this.discordWebhook, embed);
+      });
+    } else {
+      const message = `
+📊 *Daily Trading Report*
+
+📈 Signals: ${report.totalSignals} (🟢 ${report.buySignals} Buy | 🔴 ${report.sellSignals} Sell)
+📊 Avg Confidence: ${report.avgConfidence}%
+🌐 API Credits: ${report.apiCreditsUsed}/${report.apiDailyLimit}
+💓 Uptime: ${report.uptime}
+
+⏰ ${new Date().toLocaleString()}
+      `;
+
+      await this.sendWithRetry(async () => {
+        await axios.post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
+          chat_id: this.telegramChatId,
+          text: message,
+          parse_mode: 'Markdown'
+        });
+      });
     }
   }
 
@@ -157,11 +252,9 @@ ${process.env.MT5_ENABLED === 'true' ? '🤖 _Auto-executing on MT5..._' : '👆
         }]
       };
       
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(this.discordWebhook, embed);
-      } catch (err) {
-        console.error('❌ Discord send failed:', err.message);
-      }
+      });
     } else {
       const message = `
 ${emoji} *TRADE EXECUTED ON MT5*
@@ -177,15 +270,13 @@ ${emoji} *TRADE EXECUTED ON MT5*
 ⏰ ${new Date().toLocaleString()}
       `;
 
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
           chat_id: this.telegramChatId,
           text: message,
           parse_mode: 'Markdown'
         });
-      } catch (err) {
-        console.error('❌ Telegram send failed:', err.message);
-      }
+      });
     }
   }
 
@@ -193,7 +284,7 @@ ${emoji} *TRADE EXECUTED ON MT5*
     if (!this.enabled) return;
 
     if (this.service === 'discord') {
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(this.discordWebhook, {
           embeds: [{
             title: '❌ ERROR',
@@ -202,20 +293,15 @@ ${emoji} *TRADE EXECUTED ON MT5*
             timestamp: new Date().toISOString()
           }]
         });
-      } catch (err) {
-        console.error('❌ Discord send failed:', err.message);
-      }
+      });
     } else {
-      const message = `❌ *ERROR*\n\n${error}\n\n⏰ ${new Date().toLocaleString()}`;
-      try {
+      await this.sendWithRetry(async () => {
         await axios.post(`https://api.telegram.org/bot${this.telegramToken}/sendMessage`, {
           chat_id: this.telegramChatId,
-          text: message,
+          text: `❌ *ERROR*\n\n${error}\n\n⏰ ${new Date().toLocaleString()}`,
           parse_mode: 'Markdown'
         });
-      } catch (err) {
-        console.error('❌ Telegram send failed:', err.message);
-      }
+      });
     }
   }
 
