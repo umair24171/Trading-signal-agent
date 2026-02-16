@@ -139,23 +139,23 @@ _Scanning for high-quality opportunities..._
       const ctx = signal.context || {};
       console.log(`\n📊 [${candle.symbol}] Analysis #${this.stats.totalAnalyses}:`);
       console.log(`   Price: ${candle.close} | Action: ${signal.action} | Confidence: ${signal.confidence}%`);
-      console.log(`   Confluence: ${signal.confluenceCount} signals | Need: ${this.minConfluence}`);
-      console.log(`   Context: ${ctx.trend} trend | ${ctx.regime} | ${ctx.session} | Vol: ${ctx.volatility}`);
-      console.log(`   RSI: ${signal.indicators.rsi} | ADX: ${signal.indicators.adx} | Stoch: ${signal.indicators.stochK}`);
+      console.log(`   Events: ${signal.eventCount || 0} | States: ${signal.stateCount || 0} | Total: ${signal.confluenceCount} (need ${this.minConfluence})`);
+      console.log(`   Context: ${ctx.trend} trend (ADX:${ctx.trendStrength?.toFixed(0) || '?'}) | ${ctx.regime} | ${ctx.session} | Vol: ${ctx.volatility}`);
+      console.log(`   RSI: ${signal.indicators.rsi} | Stoch: ${signal.indicators.stochK}/${signal.indicators.stochD} | CCI: ${signal.indicators.cci}`);
       
       if (signal.reasons.length > 0) {
-        console.log(`   Reasons: ${signal.reasons.slice(0, 4).join(' | ')}`);
+        console.log(`   ✅ Reasons: ${signal.reasons.slice(0, 5).join(' | ')}`);
       }
       if (signal.warnings?.length > 0) {
-        console.log(`   Warnings: ${signal.warnings.join(' | ')}`);
+        console.log(`   ⚠️ ${signal.warnings.join(' | ')}`);
       }
       
       if (signal.action === 'HOLD') {
-        console.log(`   ⏸️  HOLD - Insufficient confluence`);
+        console.log(`   ⏸️  HOLD`);
       } else if (signal.confidence < this.minConfidence) {
-        console.log(`   ⚠️  Low confidence (${signal.confidence}% < ${this.minConfidence}%)`);
+        console.log(`   ❌ Rejected: confidence ${signal.confidence}% < ${this.minConfidence}%`);
       } else {
-        console.log(`   ✅ SIGNAL QUALIFIES!`);
+        console.log(`   🎯 SIGNAL QUALIFIES! → ${signal.action} @ ${signal.confidence}%`);
       }
     }
 

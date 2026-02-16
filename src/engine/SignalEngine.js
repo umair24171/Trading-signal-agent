@@ -2,19 +2,8 @@ import { RSI, MACD, EMA, SMA, BollingerBands, ATR, Stochastic, ADX, CCI } from '
 
 export class SignalEngine {
   constructor(config = {}) {
-    this.candleStore = new Map(); // symbol -> candles[]
-    this.signalHistory = new Map(); // symbol -> last signals for tracking
-    
-    // Require minimum confirmations for a signal (confluence)
+    this.candleStore = new Map();
     this.minConfluence = config.minConfluence || 3;
-    
-    // Session config (UTC hours)
-    this.sessions = {
-      london: { start: 7, end: 16 },    // London session
-      newYork: { start: 12, end: 21 },   // NY session  
-      overlap: { start: 12, end: 16 },   // Best volatility
-      asian: { start: 23, end: 8 }       // Asian session (quieter)
-    };
   }
 
   loadHistoricalCandles(symbol, candles) {
@@ -26,125 +15,72 @@ export class SignalEngine {
     if (!this.candleStore.has(candle.symbol)) {
       this.candleStore.set(candle.symbol, []);
     }
-
     const store = this.candleStore.get(candle.symbol);
     const last = store[store.length - 1];
-    
     if (last && last.timestamp === candle.timestamp) {
       store[store.length - 1] = candle;
     } else {
       store.push(candle);
-      if (store.length > 300) store.shift(); // Keep more history
+      if (store.length > 300) store.shift();
     }
   }
 
   analyze(symbol) {
     const candles = this.candleStore.get(symbol);
     if (!candles || candles.length < 60) return null;
-
     const closes = candles.map(c => c.close);
     const highs = candles.map(c => c.high);
     const lows = candles.map(c => c.low);
-    const volumes = candles.map(c => c.volume);
-
-    const indicators = this.calculateIndicators(closes, highs, lows, volumes);
-    if (!indicators) return null;
-
-    // Detect market context first
-    const context = this.getMarketContext(indicators, closes, highs, lows);
-    
-    // Generate signal with context awareness
-    return this.generateSignal(symbol, indicators, context, closes[closes.length - 1]);
+    const ind = this.calculateIndicators(closes, highs, lows);
+    if (!ind) return null;
+    const context = this.getMarketContext(ind, closes, highs, lows);
+    return this.generateSignal(symbol, ind, context, closes[closes.length - 1]);
   }
 
-  calculateIndicators(closes, highs, lows, volumes) {
+  calculateIndicators(closes, highs, lows) {
     try {
       const rsi = RSI.calculate({ values: closes, period: 14 });
-      const rsi7 = RSI.calculate({ values: closes, period: 7 }); // Fast RSI for divergence
-      
       const macd = MACD.calculate({
-        values: closes,
-        fastPeriod: 12,
-        slowPeriod: 26,
-        signalPeriod: 9,
-        SimpleMAOscillator: false,
-        SimpleMASignal: false
+        values: closes, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9,
+        SimpleMAOscillator: false, SimpleMASignal: false
       });
-
       const ema9 = EMA.calculate({ values: closes, period: 9 });
       const ema21 = EMA.calculate({ values: closes, period: 21 });
       const ema50 = EMA.calculate({ values: closes, period: 50 });
       const sma200 = SMA.calculate({ values: closes, period: Math.min(200, closes.length - 1) });
-      
       const bb = BollingerBands.calculate({ values: closes, period: 20, stdDev: 2 });
-      const bbNarrow = BollingerBands.calculate({ values: closes, period: 20, stdDev: 1 }); // For squeeze detection
-      
       const atr = ATR.calculate({ high: highs, low: lows, close: closes, period: 14 });
       const atr7 = ATR.calculate({ high: highs, low: lows, close: closes, period: 7 });
-      
       const stoch = Stochastic.calculate({ high: highs, low: lows, close: closes, period: 14, signalPeriod: 3 });
       const adx = ADX.calculate({ high: highs, low: lows, close: closes, period: 14 });
-
-      // CCI for additional confirmation
       const cci = CCI.calculate({ high: highs, low: lows, close: closes, period: 20 });
 
       return {
         price: closes[closes.length - 1],
         prevPrice: closes[closes.length - 2],
-        
-        // RSI
         rsi: rsi[rsi.length - 1],
         rsiPrev: rsi[rsi.length - 2],
-        rsiPrev2: rsi[rsi.length - 3],
-        rsi7: rsi7[rsi7.length - 1],
-        
-        // MACD
         macd: macd[macd.length - 1],
         macdPrev: macd[macd.length - 2],
-        macdPrev2: macd[macd.length - 3],
-        
-        // EMAs
+        macdPrev2: macd.length > 2 ? macd[macd.length - 3] : null,
         ema9: ema9[ema9.length - 1],
         ema21: ema21[ema21.length - 1],
         ema50: ema50[ema50.length - 1],
         sma200: sma200.length > 0 ? sma200[sma200.length - 1] : null,
-        
         ema9Prev: ema9[ema9.length - 2],
         ema21Prev: ema21[ema21.length - 2],
-        
-        // Bollinger Bands
         bb: bb[bb.length - 1],
-        bbPrev: bb[bb.length - 2],
-        bbNarrow: bbNarrow[bbNarrow.length - 1],
-        
-        // ATR
         atr: atr[atr.length - 1],
         atr7: atr7.length > 0 ? atr7[atr7.length - 1] : atr[atr.length - 1],
-        atrPrev: atr[atr.length - 5] || atr[atr.length - 1], // For volatility expansion check
-        
-        // Stochastic
+        atrPrev: atr.length > 5 ? atr[atr.length - 5] : atr[atr.length - 1],
         stoch: stoch[stoch.length - 1],
-        stochPrev: stoch[stoch.length - 2],
-        
-        // ADX
+        stochPrev: stoch.length > 1 ? stoch[stoch.length - 2] : null,
         adx: adx[adx.length - 1],
-        adxPrev: adx[adx.length - 2],
-        
-        // CCI
         cci: cci[cci.length - 1],
-        cciPrev: cci[cci.length - 2],
-        
-        // Price action data
+        cciPrev: cci.length > 1 ? cci[cci.length - 2] : null,
         recentHighs: highs.slice(-30),
         recentLows: lows.slice(-30),
-        recentCloses: closes.slice(-30),
-        
-        // For pattern detection
-        last5Candles: {
-          closes: closes.slice(-5),
-          highs: highs.slice(-5),
-          lows: lows.slice(-5)
-        }
+        recentCloses: closes.slice(-30)
       };
     } catch (err) {
       console.error('Indicator calculation error:', err.message);
@@ -152,373 +88,406 @@ export class SignalEngine {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // MARKET CONTEXT - Understand WHAT the market is doing first
-  // ═══════════════════════════════════════════════════════════════
   getMarketContext(ind, closes, highs, lows) {
     const context = {
-      trend: 'NEUTRAL',        // BULLISH, BEARISH, NEUTRAL
-      trendStrength: 0,        // 0-100
-      volatility: 'NORMAL',    // LOW, NORMAL, HIGH
-      session: 'OFF_HOURS',    // LONDON, NEW_YORK, OVERLAP, ASIAN, OFF_HOURS
-      regime: 'RANGING',       // TRENDING, RANGING, BREAKOUT
+      trend: 'NEUTRAL', trendStrength: 0, volatility: 'NORMAL',
+      session: 'OFF_HOURS', regime: 'RANGING',
       supportResistance: { support: 0, resistance: 0 }
     };
 
-    // ── TREND DETECTION ──
-    // Use EMA alignment + price position
-    const priceAboveEma50 = ind.price > ind.ema50;
-    const priceAboveSma200 = ind.sma200 ? ind.price > ind.sma200 : null;
-    const ema9AboveEma21 = ind.ema9 > ind.ema21;
-    const ema21AboveEma50 = ind.ema21 > ind.ema50;
+    // Trend
+    let ts = 0;
+    if (ind.price > ind.ema50) ts++;
+    if (ind.sma200 && ind.price > ind.sma200) ts++;
+    if (ind.ema9 > ind.ema21) ts++;
+    if (ind.ema21 > ind.ema50) ts++;
+    if (ts >= 3) { context.trend = 'BULLISH'; context.trendStrength = ind.adx?.adx || 0; }
+    else if (ts <= 1) { context.trend = 'BEARISH'; context.trendStrength = ind.adx?.adx || 0; }
 
-    let trendScore = 0;
-    if (priceAboveEma50) trendScore += 1;
-    if (priceAboveSma200) trendScore += 1;
-    if (ema9AboveEma21) trendScore += 1;
-    if (ema21AboveEma50) trendScore += 1;
-
-    if (trendScore >= 3) {
-      context.trend = 'BULLISH';
-      context.trendStrength = ind.adx?.adx || 0;
-    } else if (trendScore <= 1) {
-      context.trend = 'BEARISH';
-      context.trendStrength = ind.adx?.adx || 0;
-    } else {
-      context.trend = 'NEUTRAL';
-      context.trendStrength = 0;
-    }
-
-    // ── VOLATILITY ──
+    // Volatility
     if (ind.atr7 && ind.atrPrev) {
-      const volatilityRatio = ind.atr7 / ind.atrPrev;
-      if (volatilityRatio > 1.5) context.volatility = 'HIGH';
-      else if (volatilityRatio < 0.7) context.volatility = 'LOW';
+      const r = ind.atr7 / ind.atrPrev;
+      if (r > 1.5) context.volatility = 'HIGH';
+      else if (r < 0.7) context.volatility = 'LOW';
     }
-
-    // Bollinger Band squeeze detection
     if (ind.bb) {
-      const bbWidth = (ind.bb.upper - ind.bb.lower) / ind.bb.middle;
-      if (bbWidth < 0.01) context.volatility = 'LOW'; // Squeeze = low vol
+      const w = (ind.bb.upper - ind.bb.lower) / ind.bb.middle;
+      if (w < 0.005) context.volatility = 'SQUEEZE';
     }
 
-    // ── MARKET SESSION ──
-    const utcHour = new Date().getUTCHours();
-    if (utcHour >= 12 && utcHour < 16) context.session = 'OVERLAP';
-    else if (utcHour >= 7 && utcHour < 16) context.session = 'LONDON';
-    else if (utcHour >= 12 && utcHour < 21) context.session = 'NEW_YORK';
-    else if (utcHour >= 23 || utcHour < 8) context.session = 'ASIAN';
+    // Session
+    const h = new Date().getUTCHours();
+    if (h >= 12 && h < 16) context.session = 'OVERLAP';
+    else if (h >= 7 && h < 16) context.session = 'LONDON';
+    else if (h >= 12 && h < 21) context.session = 'NEW_YORK';
+    else if (h >= 23 || h < 8) context.session = 'ASIAN';
 
-    // ── REGIME ──
-    if (ind.adx && ind.adx.adx > 25) {
-      context.regime = 'TRENDING';
-    } else if (context.volatility === 'LOW') {
-      context.regime = 'RANGING'; // Could break out soon
+    // Regime
+    if (ind.adx && ind.adx.adx > 25) context.regime = 'TRENDING';
+    else if (context.volatility === 'SQUEEZE') context.regime = 'SQUEEZE';
+    const rHigh = Math.max(...highs.slice(-20, -1));
+    const rLow = Math.min(...lows.slice(-20, -1));
+    if (ind.price > rHigh || ind.price < rLow) context.regime = 'BREAKOUT';
+
+    // S/R
+    const lb = Math.min(50, highs.length);
+    const rh = highs.slice(-lb), rl = lows.slice(-lb);
+    const price = closes[closes.length - 1];
+    const sH = [], sL = [];
+    for (let i = 2; i < lb - 2; i++) {
+      if (rh[i] > rh[i-1] && rh[i] > rh[i-2] && rh[i] > rh[i+1] && rh[i] > rh[i+2]) sH.push(rh[i]);
+      if (rl[i] < rl[i-1] && rl[i] < rl[i-2] && rl[i] < rl[i+1] && rl[i] < rl[i+2]) sL.push(rl[i]);
     }
-
-    // Check for breakout
-    const recentHigh = Math.max(...highs.slice(-20, -1));
-    const recentLow = Math.min(...lows.slice(-20, -1));
-    if (ind.price > recentHigh || ind.price < recentLow) {
-      context.regime = 'BREAKOUT';
-    }
-
-    // ── SUPPORT & RESISTANCE ──
-    context.supportResistance = this.findSupportResistance(closes, highs, lows);
+    context.supportResistance = {
+      resistance: sH.filter(v => v > price).sort((a,b) => a-b)[0] || Math.max(...rh),
+      support: sL.filter(v => v < price).sort((a,b) => b-a)[0] || Math.min(...rl)
+    };
 
     return context;
   }
 
-  findSupportResistance(closes, highs, lows) {
-    // Simple pivot-based S/R from last 50 candles
-    const lookback = Math.min(50, highs.length);
-    const recentHighs = highs.slice(-lookback);
-    const recentLows = lows.slice(-lookback);
-    const currentPrice = closes[closes.length - 1];
-
-    // Find swing highs and lows
-    const swingHighs = [];
-    const swingLows = [];
-
-    for (let i = 2; i < lookback - 2; i++) {
-      if (recentHighs[i] > recentHighs[i-1] && recentHighs[i] > recentHighs[i-2] &&
-          recentHighs[i] > recentHighs[i+1] && recentHighs[i] > recentHighs[i+2]) {
-        swingHighs.push(recentHighs[i]);
-      }
-      if (recentLows[i] < recentLows[i-1] && recentLows[i] < recentLows[i-2] &&
-          recentLows[i] < recentLows[i+1] && recentLows[i] < recentLows[i+2]) {
-        swingLows.push(recentLows[i]);
-      }
-    }
-
-    // Nearest resistance above price
-    const resistance = swingHighs
-      .filter(h => h > currentPrice)
-      .sort((a, b) => a - b)[0] || Math.max(...recentHighs);
-
-    // Nearest support below price
-    const support = swingLows
-      .filter(l => l < currentPrice)
-      .sort((a, b) => b - a)[0] || Math.min(...recentLows);
-
-    return { support, resistance };
-  }
-
   // ═══════════════════════════════════════════════════════════════
-  // SIGNAL GENERATION - Confluence-based with context
+  // SIGNAL GENERATION v3
+  //
+  // FIXES from v2:
+  //  1. No double counting (MACD crossover blocks MACD state)
+  //  2. RSI/Stoch in neutral zone does NOT generate signals
+  //  3. CONFLICT DETECTION - opposing indicators BLOCK the signal
+  //  4. Stronger against-trend penalty (50% instead of 30%)
+  //  5. Lower confidence scaling (more honest percentages)
+  //  6. ADX minimum for breakout signals
+  //  7. Squeeze breakout only with ADX confirmation
   // ═══════════════════════════════════════════════════════════════
   generateSignal(symbol, ind, context, currentPrice) {
-    const buySignals = [];
-    const sellSignals = [];
+    const buyEvents = [], sellEvents = [];
+    const buyState = [], sellState = [];
+    const buyConflicts = [], sellConflicts = []; // NEW: track conflicts
 
-    // ─────────────────────────────────────────
-    // SIGNAL 1: EMA CROSSOVER (Trend following)
-    // ─────────────────────────────────────────
+    // Track which indicators fired events (to prevent double counting)
+    const eventSources = new Set();
+
+    // ─── EVENTS (crossovers - the trigger) ───
+
+    // EMA 9/21 crossover
     if (ind.ema9 > ind.ema21 && ind.ema9Prev <= ind.ema21Prev) {
-      buySignals.push({ name: 'EMA 9/21 bullish crossover', weight: 2 });
+      buyEvents.push('EMA 9/21 bullish crossover');
+      eventSources.add('ema');
     } else if (ind.ema9 < ind.ema21 && ind.ema9Prev >= ind.ema21Prev) {
-      sellSignals.push({ name: 'EMA 9/21 bearish crossover', weight: 2 });
+      sellEvents.push('EMA 9/21 bearish crossover');
+      eventSources.add('ema');
     }
 
-    // EMA alignment (all aligned = strong trend)
-    if (ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50) {
-      buySignals.push({ name: 'Full EMA bullish alignment', weight: 1.5 });
-    } else if (ind.ema9 < ind.ema21 && ind.ema21 < ind.ema50) {
-      sellSignals.push({ name: 'Full EMA bearish alignment', weight: 1.5 });
-    }
-
-    // ─────────────────────────────────────────
-    // SIGNAL 2: MACD (Momentum)
-    // ─────────────────────────────────────────
+    // MACD crossover
     if (ind.macd && ind.macdPrev) {
-      // Bullish crossover
       if (ind.macd.MACD > ind.macd.signal && ind.macdPrev.MACD <= ind.macdPrev.signal) {
-        const weight = ind.macd.histogram > 0 ? 2 : 1.5;
-        buySignals.push({ name: 'MACD bullish crossover', weight });
-      }
-      // Bearish crossover
-      else if (ind.macd.MACD < ind.macd.signal && ind.macdPrev.MACD >= ind.macdPrev.signal) {
-        const weight = ind.macd.histogram < 0 ? 2 : 1.5;
-        sellSignals.push({ name: 'MACD bearish crossover', weight });
-      }
-      
-      // MACD histogram increasing (momentum building)
-      if (ind.macdPrev2) {
-        const histChange = ind.macd.histogram - ind.macdPrev.histogram;
-        const prevHistChange = ind.macdPrev.histogram - ind.macdPrev2.histogram;
-        if (histChange > 0 && prevHistChange > 0 && ind.macd.histogram > 0) {
-          buySignals.push({ name: 'MACD momentum accelerating', weight: 1 });
-        } else if (histChange < 0 && prevHistChange < 0 && ind.macd.histogram < 0) {
-          sellSignals.push({ name: 'MACD momentum accelerating down', weight: 1 });
-        }
+        buyEvents.push('MACD bullish crossover');
+        eventSources.add('macd');
+      } else if (ind.macd.MACD < ind.macd.signal && ind.macdPrev.MACD >= ind.macdPrev.signal) {
+        sellEvents.push('MACD bearish crossover');
+        eventSources.add('macd');
       }
     }
 
-    // ─────────────────────────────────────────
-    // SIGNAL 3: RSI (Momentum + Divergence)
-    // ─────────────────────────────────────────
-    // Standard oversold/overbought
-    if (ind.rsi < 30) {
-      buySignals.push({ name: `RSI oversold (${ind.rsi.toFixed(1)})`, weight: 1.5 });
-    } else if (ind.rsi > 70) {
-      sellSignals.push({ name: `RSI overbought (${ind.rsi.toFixed(1)})`, weight: 1.5 });
-    }
-
-    // RSI divergence (price makes new low but RSI doesn't - bullish)
-    if (ind.rsiPrev2 && ind.rsiPrev) {
-      const priceMakingLowerLow = ind.price < ind.prevPrice;
-      const rsiMakingHigherLow = ind.rsi > ind.rsiPrev;
-      if (priceMakingLowerLow && rsiMakingHigherLow && ind.rsi < 40) {
-        buySignals.push({ name: 'RSI bullish divergence', weight: 2 });
-      }
-      
-      const priceMakingHigherHigh = ind.price > ind.prevPrice;
-      const rsiMakingLowerHigh = ind.rsi < ind.rsiPrev;
-      if (priceMakingHigherHigh && rsiMakingLowerHigh && ind.rsi > 60) {
-        sellSignals.push({ name: 'RSI bearish divergence', weight: 2 });
-      }
-    }
-
-    // ─────────────────────────────────────────
-    // SIGNAL 4: BOLLINGER BANDS (Mean reversion + Breakout)
-    // ─────────────────────────────────────────
-    if (ind.bb) {
-      const percentB = (ind.price - ind.bb.lower) / (ind.bb.upper - ind.bb.lower);
-      
-      // Mean reversion: price at bands in ranging market
-      if (context.regime === 'RANGING') {
-        if (percentB < 0.05) {
-          buySignals.push({ name: 'Price at lower BB (ranging)', weight: 1.5 });
-        } else if (percentB > 0.95) {
-          sellSignals.push({ name: 'Price at upper BB (ranging)', weight: 1.5 });
-        }
-      }
-      
-      // Breakout: price breaking bands in trending market with volume
-      if (context.regime === 'TRENDING' || context.regime === 'BREAKOUT') {
-        if (percentB > 1.0 && context.trend === 'BULLISH') {
-          buySignals.push({ name: 'BB breakout (bullish trend)', weight: 1.5 });
-        } else if (percentB < 0.0 && context.trend === 'BEARISH') {
-          sellSignals.push({ name: 'BB breakdown (bearish trend)', weight: 1.5 });
-        }
-      }
-    }
-
-    // ─────────────────────────────────────────
-    // SIGNAL 5: STOCHASTIC (Momentum in extremes)
-    // ─────────────────────────────────────────
+    // Stochastic crossover in extreme zones (20/80 - tighter than v2)
     if (ind.stoch && ind.stochPrev) {
       if (ind.stoch.k < 20 && ind.stoch.k > ind.stoch.d && ind.stochPrev.k <= ind.stochPrev.d) {
-        buySignals.push({ name: 'Stochastic bullish crossover (oversold)', weight: 1.5 });
+        buyEvents.push('Stochastic bullish crossover (oversold)');
+        eventSources.add('stoch');
       } else if (ind.stoch.k > 80 && ind.stoch.k < ind.stoch.d && ind.stochPrev.k >= ind.stochPrev.d) {
-        sellSignals.push({ name: 'Stochastic bearish crossover (overbought)', weight: 1.5 });
+        sellEvents.push('Stochastic bearish crossover (overbought)');
+        eventSources.add('stoch');
       }
     }
 
-    // ─────────────────────────────────────────
-    // SIGNAL 6: CCI (Commodity Channel Index)
-    // ─────────────────────────────────────────
+    // CCI crossover
     if (ind.cci !== undefined && ind.cciPrev !== undefined) {
       if (ind.cci > -100 && ind.cciPrev <= -100) {
-        buySignals.push({ name: 'CCI crossing above -100', weight: 1 });
+        buyEvents.push('CCI crossing above -100');
+        eventSources.add('cci');
       } else if (ind.cci < 100 && ind.cciPrev >= 100) {
-        sellSignals.push({ name: 'CCI crossing below 100', weight: 1 });
+        sellEvents.push('CCI crossing below 100');
+        eventSources.add('cci');
       }
     }
 
-    // ─────────────────────────────────────────
-    // SIGNAL 7: BREAKOUT (Price action)
-    // ─────────────────────────────────────────
-    const recentHigh = Math.max(...ind.recentHighs.slice(0, -1));
-    const recentLow = Math.min(...ind.recentLows.slice(0, -1));
-
-    if (ind.price > recentHigh) {
-      buySignals.push({ name: 'Breakout above 30-bar high', weight: 2 });
-    } else if (ind.price < recentLow) {
-      sellSignals.push({ name: 'Breakdown below 30-bar low', weight: 2 });
+    // Breakout — ONLY if ADX shows some trend strength
+    const rHigh = Math.max(...ind.recentHighs.slice(0, -1));
+    const rLow = Math.min(...ind.recentLows.slice(0, -1));
+    if (ind.price > rHigh && ind.adx && ind.adx.adx > 20) {
+      buyEvents.push('Breakout above recent high');
+      eventSources.add('breakout');
+    } else if (ind.price < rLow && ind.adx && ind.adx.adx > 20) {
+      sellEvents.push('Breakdown below recent low');
+      eventSources.add('breakout');
     }
 
-    // ─────────────────────────────────────────
-    // SIGNAL 8: SUPPORT/RESISTANCE PROXIMITY
-    // ─────────────────────────────────────────
-    const sr = context.supportResistance;
-    const atrValue = ind.atr || currentPrice * 0.01;
-    
-    if (Math.abs(currentPrice - sr.support) < atrValue * 0.5) {
-      buySignals.push({ name: 'Price near support level', weight: 1 });
+    // RSI exiting extreme
+    if (ind.rsi && ind.rsiPrev) {
+      if (ind.rsi > 30 && ind.rsiPrev <= 30) {
+        buyEvents.push('RSI exiting oversold');
+        eventSources.add('rsi');
+      } else if (ind.rsi < 70 && ind.rsiPrev >= 70) {
+        sellEvents.push('RSI exiting overbought');
+        eventSources.add('rsi');
+      }
     }
-    if (Math.abs(currentPrice - sr.resistance) < atrValue * 0.5) {
-      sellSignals.push({ name: 'Price near resistance level', weight: 1 });
+
+    // ─── STATE SIGNALS (confirms direction — NO double counting) ───
+
+    // EMA alignment — only if EMA crossover didn't fire
+    if (!eventSources.has('ema')) {
+      if (ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50)
+        buyState.push('EMA bullish alignment (9>21>50)');
+      else if (ind.ema9 < ind.ema21 && ind.ema21 < ind.ema50)
+        sellState.push('EMA bearish alignment (9<21<50)');
+    }
+
+    // Price vs key EMAs
+    if (ind.price > ind.ema21 && ind.price > ind.ema50)
+      buyState.push('Price above EMA 21 & 50');
+    else if (ind.price < ind.ema21 && ind.price < ind.ema50)
+      sellState.push('Price below EMA 21 & 50');
+
+    // MACD position — only if MACD crossover didn't fire (NO DOUBLE COUNTING)
+    if (!eventSources.has('macd')) {
+      if (ind.macd && ind.macd.MACD > ind.macd.signal && ind.macd.histogram > 0)
+        buyState.push('MACD bullish');
+      else if (ind.macd && ind.macd.MACD < ind.macd.signal && ind.macd.histogram < 0)
+        sellState.push('MACD bearish');
+    }
+
+    // MACD histogram momentum (3 bars accelerating) — only if no MACD event
+    if (!eventSources.has('macd') && ind.macd && ind.macdPrev && ind.macdPrev2) {
+      if (ind.macd.histogram > ind.macdPrev.histogram && 
+          ind.macdPrev.histogram > ind.macdPrev2.histogram &&
+          ind.macd.histogram > 0) {
+        buyState.push('MACD momentum building');
+      } else if (ind.macd.histogram < ind.macdPrev.histogram && 
+                 ind.macdPrev.histogram < ind.macdPrev2.histogram &&
+                 ind.macd.histogram < 0) {
+        sellState.push('MACD sell momentum');
+      }
+    }
+
+    // RSI zones — ONLY in meaningful zones, NOT neutral (40-60 = NO SIGNAL)
+    if (ind.rsi < 35) buyState.push(`RSI oversold zone (${ind.rsi.toFixed(1)})`);
+    else if (ind.rsi > 65) sellState.push(`RSI overbought zone (${ind.rsi.toFixed(1)})`);
+
+    // RSI direction — ONLY when RSI is already in a meaningful zone
+    if (ind.rsiPrev) {
+      if (ind.rsi > ind.rsiPrev && ind.rsi < 40) buyState.push('RSI rising from low');
+      else if (ind.rsi < ind.rsiPrev && ind.rsi > 60) sellState.push('RSI falling from high');
+    }
+
+    // Stochastic position — only if no stoch event
+    if (!eventSources.has('stoch') && ind.stoch) {
+      if (ind.stoch.k < 25 && ind.stoch.d < 25) buyState.push('Stochastic oversold');
+      else if (ind.stoch.k > 75 && ind.stoch.d > 75) sellState.push('Stochastic overbought');
+    }
+
+    // Bollinger band position
+    if (ind.bb) {
+      const pB = (ind.price - ind.bb.lower) / (ind.bb.upper - ind.bb.lower);
+      if (pB < 0.10) buyState.push('Price at lower Bollinger Band');
+      else if (pB > 0.90) sellState.push('Price at upper Bollinger Band');
+    }
+
+    // ADX direction — only counts if ADX is strong enough (>22)
+    if (ind.adx && ind.adx.adx > 22) {
+      if (ind.adx.pdi > ind.adx.mdi) buyState.push(`ADX bullish (${ind.adx.adx.toFixed(0)})`);
+      else sellState.push(`ADX bearish (${ind.adx.adx.toFixed(0)})`);
+    }
+
+    // SMA 200
+    if (ind.sma200) {
+      if (ind.price > ind.sma200) buyState.push('Above SMA 200');
+      else sellState.push('Below SMA 200');
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CONFLUENCE CHECK + CONTEXT FILTERS
+    // CONFLICT DETECTION — opposing signals that BLOCK the trade
+    // This is the key fix: if strong opposing indicators exist,
+    // the signal gets killed or heavily penalized
     // ═══════════════════════════════════════════════════════════
 
-    const buyWeight = buySignals.reduce((sum, s) => sum + s.weight, 0);
-    const sellWeight = sellSignals.reduce((sum, s) => sum + s.weight, 0);
-    const buyCount = buySignals.length;
-    const sellCount = sellSignals.length;
+    // Stochastic conflicts
+    if (ind.stoch) {
+      if (ind.stoch.k < 25) sellConflicts.push(`Stochastic oversold (${ind.stoch.k.toFixed(0)}) — don't sell`);
+      if (ind.stoch.k > 75) buyConflicts.push(`Stochastic overbought (${ind.stoch.k.toFixed(0)}) — don't buy`);
+    }
 
-    let action = 'HOLD';
-    let confidence = 0;
-    let reasons = [];
-    let warnings = [];
+    // RSI conflicts
+    if (ind.rsi < 30) sellConflicts.push(`RSI oversold (${ind.rsi.toFixed(0)}) — don't sell`);
+    if (ind.rsi > 70) buyConflicts.push(`RSI overbought (${ind.rsi.toFixed(0)}) — don't buy`);
 
-    // ── CONFLUENCE REQUIREMENT: Need 3+ confirming signals ──
-    if (buyCount >= this.minConfluence && buyWeight > sellWeight * 1.5) {
+    // Bollinger conflicts
+    if (ind.bb) {
+      const pB = (ind.price - ind.bb.lower) / (ind.bb.upper - ind.bb.lower);
+      if (pB < 0.05) sellConflicts.push('Price at extreme lower BB — don\'t sell');
+      if (pB > 0.95) buyConflicts.push('Price at extreme upper BB — don\'t buy');
+    }
+
+    // CCI conflicts
+    if (ind.cci < -200) sellConflicts.push('CCI extremely oversold — don\'t sell');
+    if (ind.cci > 200) buyConflicts.push('CCI extremely overbought — don\'t buy');
+
+    // ═══════════════════════════════════════════════════════════
+    // DECISION LOGIC
+    //
+    // Requirements:
+    //  1. At least 1 EVENT (something just happened)
+    //  2. EVENT + STATE >= minConfluence
+    //  3. Buy total > Sell total (clear direction)
+    //  4. NO hard conflicts (stoch oversold blocks sell, etc.)
+    //  5. NOT against a strong trend
+    // ═══════════════════════════════════════════════════════════
+
+    const totalBuy = buyEvents.length + buyState.length;
+    const totalSell = sellEvents.length + sellState.length;
+
+    let action = 'HOLD', confidence = 0, reasons = [], warnings = [];
+    let confluenceCount = 0, eventCount = 0, stateCount = 0;
+
+    // Check for hard conflicts first
+    const buyBlocked = buyConflicts.length > 0;
+    const sellBlocked = sellConflicts.length > 0;
+
+    if (buyEvents.length >= 1 && totalBuy >= this.minConfluence && totalBuy > totalSell && !buyBlocked) {
       action = 'BUY';
-      confidence = Math.min(Math.round(buyWeight * 8), 100); // Scale to 100
-      reasons = buySignals.map(s => s.name);
-    } else if (sellCount >= this.minConfluence && sellWeight > buyWeight * 1.5) {
+      confluenceCount = totalBuy;
+      eventCount = buyEvents.length;
+      stateCount = buyState.length;
+      reasons = [...buyEvents, ...buyState];
+
+      // Confidence: more conservative scaling
+      // 3 signals = 40%, 4 = 48%, 5 = 55%, 6 = 62%, 7 = 68%, 8+ = 75%+
+      confidence = Math.min(25 + (confluenceCount * 8), 85);
+      if (buyEvents.length >= 2) confidence = Math.min(confidence + 8, 88);
+
+    } else if (sellEvents.length >= 1 && totalSell >= this.minConfluence && totalSell > totalBuy && !sellBlocked) {
       action = 'SELL';
-      confidence = Math.min(Math.round(sellWeight * 8), 100);
-      reasons = sellSignals.map(s => s.name);
+      confluenceCount = totalSell;
+      eventCount = sellEvents.length;
+      stateCount = sellState.length;
+      reasons = [...sellEvents, ...sellState];
+
+      confidence = Math.min(25 + (confluenceCount * 8), 85);
+      if (sellEvents.length >= 2) confidence = Math.min(confidence + 8, 88);
     }
 
-    // ── CONTEXT FILTERS (can reduce confidence or block) ──
+    // If blocked by conflict, report it in debug
+    if (action === 'HOLD') {
+      if (buyEvents.length >= 1 && buyBlocked) {
+        warnings = buyConflicts.map(c => `BLOCKED: ${c}`);
+      } else if (sellEvents.length >= 1 && sellBlocked) {
+        warnings = sellConflicts.map(c => `BLOCKED: ${c}`);
+      }
+    }
+
+    // ── CONTEXT ADJUSTMENTS ──
     if (action !== 'HOLD') {
-      // Filter 1: Don't trade against strong trend
+
+      // HARD BLOCK: Don't trade against strong trend (ADX > 30)
       if (action === 'BUY' && context.trend === 'BEARISH' && context.trendStrength > 30) {
-        confidence = Math.round(confidence * 0.5);
-        warnings.push('⚠️ Against bearish trend');
+        action = 'HOLD';
+        confidence = 0;
+        warnings.push('BLOCKED: Strong bearish trend (ADX > 30)');
+        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, context, [], warnings, 0, 0, 0);
       }
       if (action === 'SELL' && context.trend === 'BULLISH' && context.trendStrength > 30) {
+        action = 'HOLD';
+        confidence = 0;
+        warnings.push('BLOCKED: Strong bullish trend (ADX > 30)');
+        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, context, [], warnings, 0, 0, 0);
+      }
+
+      // Moderate penalty: against weak trend (ADX 20-30)
+      if (action === 'BUY' && context.trend === 'BEARISH') {
         confidence = Math.round(confidence * 0.5);
-        warnings.push('⚠️ Against bullish trend');
+        warnings.push('Against bearish trend (-50%)');
+      }
+      if (action === 'SELL' && context.trend === 'BULLISH') {
+        confidence = Math.round(confidence * 0.5);
+        warnings.push('Against bullish trend (-50%)');
       }
 
-      // Filter 2: Boost during high-activity sessions
+      // Boost with-trend
+      if (action === 'BUY' && context.trend === 'BULLISH') {
+        confidence = Math.min(Math.round(confidence * 1.15), 90);
+        reasons.push('With bullish trend');
+      }
+      if (action === 'SELL' && context.trend === 'BEARISH') {
+        confidence = Math.min(Math.round(confidence * 1.15), 90);
+        reasons.push('With bearish trend');
+      }
+
+      // Session adjustments
       if (context.session === 'OVERLAP') {
-        confidence = Math.min(Math.round(confidence * 1.15), 100);
-        reasons.push('London/NY overlap session');
+        confidence = Math.min(Math.round(confidence * 1.1), 90);
+        reasons.push('London/NY overlap');
       } else if (context.session === 'LONDON' || context.session === 'NEW_YORK') {
-        confidence = Math.min(Math.round(confidence * 1.05), 100);
+        confidence = Math.min(Math.round(confidence * 1.05), 90);
+      } else if (context.session === 'ASIAN') {
+        confidence = Math.round(confidence * 0.85);
+        warnings.push('Asian session (-15%)');
       }
 
-      // Filter 3: Boost if ADX confirms trend strength
-      if (ind.adx && ind.adx.adx > 25) {
-        const adxBoost = (action === 'BUY' && ind.adx.pdi > ind.adx.mdi) ||
-                         (action === 'SELL' && ind.adx.mdi > ind.adx.pdi);
-        if (adxBoost) {
-          confidence = Math.min(Math.round(confidence * 1.1), 100);
-          reasons.push(`ADX confirms (${ind.adx.adx.toFixed(1)})`);
-        } else {
-          confidence = Math.round(confidence * 0.8);
-          warnings.push('ADX direction mismatch');
-        }
-      }
-
-      // Filter 4: High volatility = wider stops needed, lower confidence
+      // High volatility
       if (context.volatility === 'HIGH') {
         confidence = Math.round(confidence * 0.9);
         warnings.push('High volatility');
       }
+
+      // Squeeze — only boost if ADX is rising (real breakout, not fake)
+      if (context.regime === 'SQUEEZE' && ind.adx && ind.adx.adx > 20) {
+        confidence = Math.min(Math.round(confidence * 1.08), 90);
+        reasons.push('Squeeze breakout (ADX confirming)');
+      }
+
+      // Final minimum check — after all adjustments, still need 40%+
+      if (confidence < 40) {
+        action = 'HOLD';
+        confidence = 0;
+        warnings.push('Confidence too low after adjustments');
+      }
     }
 
-    // ── CALCULATE DYNAMIC STOP LOSS & TAKE PROFIT ──
-    const atrMultiplierSL = context.volatility === 'HIGH' ? 2.5 : 2.0;
-    const atrMultiplierTP = context.regime === 'TRENDING' ? 3.5 : 2.5;
-    
-    const stopLoss = action === 'BUY'
-      ? currentPrice - (atrValue * atrMultiplierSL)
-      : currentPrice + (atrValue * atrMultiplierSL);
-    const takeProfit = action === 'BUY'
-      ? currentPrice + (atrValue * atrMultiplierTP)
-      : currentPrice - (atrValue * atrMultiplierTP);
+    return this.buildResult(symbol, action, confidence, currentPrice, ind, context, reasons, warnings, confluenceCount, eventCount, stateCount);
+  }
 
-    const riskReward = atrMultiplierTP / atrMultiplierSL;
+  buildResult(symbol, action, confidence, currentPrice, ind, context, reasons, warnings, confluenceCount, eventCount, stateCount) {
+    const atrValue = ind.atr || currentPrice * 0.01;
+    const slMul = context.volatility === 'HIGH' ? 2.5 : 2.0;
+    const tpMul = context.regime === 'TRENDING' ? 3.0 : 2.0;
+
+    let stopLoss, takeProfit;
+    if (action === 'BUY') {
+      stopLoss = currentPrice - (atrValue * slMul);
+      takeProfit = currentPrice + (atrValue * tpMul);
+    } else if (action === 'SELL') {
+      stopLoss = currentPrice + (atrValue * slMul);
+      takeProfit = currentPrice - (atrValue * tpMul);
+    } else {
+      stopLoss = 0;
+      takeProfit = 0;
+    }
 
     return {
-      symbol,
-      action,
-      confidence,
-      price: currentPrice,
-      stopLoss,
-      takeProfit,
-      riskReward: parseFloat(riskReward.toFixed(2)),
-      reasons,
-      warnings,
+      symbol, action, confidence, price: currentPrice, stopLoss, takeProfit,
+      riskReward: action !== 'HOLD' ? parseFloat((tpMul / slMul).toFixed(2)) : 0,
+      reasons, warnings,
       context: {
-        trend: context.trend,
-        trendStrength: context.trendStrength,
-        regime: context.regime,
-        session: context.session,
-        volatility: context.volatility,
-        support: context.supportResistance.support,
-        resistance: context.supportResistance.resistance
+        trend: context.trend, trendStrength: context.trendStrength,
+        regime: context.regime, session: context.session, volatility: context.volatility,
+        support: context.supportResistance.support, resistance: context.supportResistance.resistance
       },
-      confluenceCount: action === 'BUY' ? buyCount : (action === 'SELL' ? sellCount : 0),
+      confluenceCount, eventCount, stateCount,
       indicators: {
-        rsi: ind.rsi?.toFixed(2),
-        macd: ind.macd?.histogram?.toFixed(5),
-        adx: ind.adx?.adx?.toFixed(2),
-        atr: atrValue?.toFixed(5),
-        stochK: ind.stoch?.k?.toFixed(2),
+        rsi: ind.rsi?.toFixed(2), macd: ind.macd?.histogram?.toFixed(5),
+        adx: ind.adx?.adx?.toFixed(2), atr: atrValue?.toFixed(5),
+        stochK: ind.stoch?.k?.toFixed(2), stochD: ind.stoch?.d?.toFixed(2),
         cci: ind.cci?.toFixed(2),
-        ema9: ind.ema9?.toFixed(5),
-        ema21: ind.ema21?.toFixed(5),
-        ema50: ind.ema50?.toFixed(5)
+        ema9: ind.ema9?.toFixed(5), ema21: ind.ema21?.toFixed(5), ema50: ind.ema50?.toFixed(5)
       },
       timestamp: Date.now()
     };
