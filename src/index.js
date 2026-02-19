@@ -141,10 +141,10 @@ _Scanning for high-quality opportunities..._
       console.log(`   Price: ${candle.close} | Action: ${signal.action} | Confidence: ${signal.confidence}%`);
       console.log(`   Events: ${signal.eventCount || 0} | States: ${signal.stateCount || 0} | Total: ${signal.confluenceCount} (need ${this.minConfluence})`);
       console.log(`   Context: ${ctx.trend} trend (ADX:${ctx.trendStrength?.toFixed(0) || '?'}) | ${ctx.regime} | ${ctx.session} | Vol: ${ctx.volatility}`);
-      console.log(`   RSI: ${signal.indicators.rsi} | Stoch: ${signal.indicators.stochK}/${signal.indicators.stochD} | CCI: ${signal.indicators.cci}`);
+      console.log(`   RSI: ${signal.indicators.rsi} | Stoch: ${signal.indicators.stochK}/${signal.indicators.stochD} | MACD: ${signal.indicators.macd} | CCI: ${signal.indicators.cci}`);
       
       if (signal.reasons.length > 0) {
-        console.log(`   ✅ Reasons: ${signal.reasons.slice(0, 5).join(' | ')}`);
+        console.log(`   ✅ Reasons: ${signal.reasons.slice(0, 6).join(' | ')}`);
       }
       if (signal.warnings?.length > 0) {
         console.log(`   ⚠️ ${signal.warnings.join(' | ')}`);
