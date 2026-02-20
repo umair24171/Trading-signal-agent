@@ -137,11 +137,13 @@ _Scanning for high-quality opportunities..._
     // ── DEBUG MODE ──
     if (process.env.DEBUG_MODE === 'true') {
       const ctx = signal.context || {};
+      const mom = signal.momentum || {};
       console.log(`\n📊 [${candle.symbol}] Analysis #${this.stats.totalAnalyses}:`);
       console.log(`   Price: ${candle.close} | Action: ${signal.action} | Confidence: ${signal.confidence}%`);
       console.log(`   Events: ${signal.eventCount || 0} | States: ${signal.stateCount || 0} | Total: ${signal.confluenceCount} (need ${this.minConfluence})`);
       console.log(`   Context: ${ctx.trend} trend (ADX:${ctx.trendStrength?.toFixed(0) || '?'}) | ${ctx.regime} | ${ctx.session} | Vol: ${ctx.volatility}`);
-      console.log(`   RSI: ${signal.indicators.rsi} | Stoch: ${signal.indicators.stochK}/${signal.indicators.stochD} | MACD: ${signal.indicators.macd} | CCI: ${signal.indicators.cci}`);
+      console.log(`   RSI: ${signal.indicators.rsi} | Stoch: ${signal.indicators.stochK}/${signal.indicators.stochD} | MACD: ${signal.indicators.macd}`);
+      console.log(`   Momentum: ${mom.bullishCandles || 0}🟢/${mom.bearishCandles || 0}🔴 candles | Structure: ${mom.priceStructure || 'N/A'} | StochPersist: ${mom.stochPersistence || 'N/A'} | Move: ${mom.moveSize || '0'}x ATR${mom.isMomentumMove ? ' 🚀' : ''}`);
       
       if (signal.reasons.length > 0) {
         console.log(`   ✅ Reasons: ${signal.reasons.slice(0, 6).join(' | ')}`);

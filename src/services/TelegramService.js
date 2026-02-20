@@ -103,6 +103,23 @@ export class TelegramService {
       });
     }
 
+    // v6: Momentum info
+    if (signal.momentum) {
+      const mom = signal.momentum;
+      const parts = [];
+      if (mom.bullishCandles > 0) parts.push(`${mom.bullishCandles}🟢 candles`);
+      if (mom.bearishCandles > 0) parts.push(`${mom.bearishCandles}🔴 candles`);
+      if (mom.priceStructure !== 'NONE') parts.push(`Structure: ${mom.priceStructure}`);
+      if (mom.isMomentumMove) parts.push(`🚀 Strong move (${mom.moveSize}x ATR)`);
+      if (parts.length > 0) {
+        fields.push({
+          name: '💪 Momentum',
+          value: parts.join(' | '),
+          inline: false
+        });
+      }
+    }
+
     const embed = {
       embeds: [{
         title: `${emoji} ${signal.action} SIGNAL — ${signal.symbol}`,
