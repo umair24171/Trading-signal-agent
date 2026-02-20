@@ -4,6 +4,7 @@ export class SignalEngine {
   constructor(config = {}) {
     this.candleStore = new Map();
     this.minConfluence = config.minConfluence || 3;
+    this.minRR = config.minRR || 1.5; // NEW: Minimum risk:reward ratio
   }
 
   loadHistoricalCandles(symbol, candles) {
@@ -68,14 +69,22 @@ export class SignalEngine {
   getContext(ind, closes, highs, lows) {
     const ctx = { trend: 'NEUTRAL', trendStrength: 0, volatility: 'NORMAL', session: 'OFF_HOURS', regime: 'RANGING', sr: { support: 0, resistance: 0 } };
 
-    // Trend
+    // ── TREND (now requires ADX >= 20 to even call it a trend) ──
     let ts = 0;
     if (ind.price > ind.ema50) ts++;
     if (ind.sma200 && ind.price > ind.sma200) ts++;
     if (ind.ema9 > ind.ema21) ts++;
     if (ind.ema21 > ind.ema50) ts++;
-    if (ts >= 3) { ctx.trend = 'BULLISH'; ctx.trendStrength = ind.adx?.adx || 0; }
-    else if (ts <= 1) { ctx.trend = 'BEARISH'; ctx.trendStrength = ind.adx?.adx || 0; }
+
+    const adxValue = ind.adx?.adx || 0;
+
+    // KEY FIX: ADX must be >= 20 to confirm any trend
+    // Below 20 = NEUTRAL regardless of EMA alignment
+    if (adxValue >= 20) {
+      if (ts >= 3) { ctx.trend = 'BULLISH'; ctx.trendStrength = adxValue; }
+      else if (ts <= 1) { ctx.trend = 'BEARISH'; ctx.trendStrength = adxValue; }
+    }
+    // ADX < 20 = no trend, stays NEUTRAL
 
     // Volatility
     if (ind.atr7 && ind.atrPrev) {
@@ -92,13 +101,18 @@ export class SignalEngine {
     else if (h >= 12 && h < 21) ctx.session = 'NEW_YORK';
     else if (h >= 23 || h < 8) ctx.session = 'ASIAN';
 
-    // Regime
-    if (ind.adx && ind.adx.adx > 25) ctx.regime = 'TRENDING';
+    // Regime — needs ADX >= 25 for TRENDING
+    if (adxValue >= 25) ctx.regime = 'TRENDING';
     const rH = Math.max(...highs.slice(-20, -1));
     const rL = Math.min(...lows.slice(-20, -1));
-    if (ind.price > rH || ind.price < rL) ctx.regime = 'BREAKOUT';
+    if ((ind.price > rH || ind.price < rL) && adxValue >= 20) ctx.regime = 'BREAKOUT';
 
-    // S/R
+    // S/R — improved with clustering
+    ctx.sr = this.findSR(closes, highs, lows);
+    return ctx;
+  }
+
+  findSR(closes, highs, lows) {
     const lb = Math.min(50, highs.length);
     const rh = highs.slice(-lb), rl = lows.slice(-lb);
     const price = closes[closes.length - 1];
@@ -107,52 +121,57 @@ export class SignalEngine {
       if (rh[i] > rh[i-1] && rh[i] > rh[i-2] && rh[i] > rh[i+1] && rh[i] > rh[i+2]) sH.push(rh[i]);
       if (rl[i] < rl[i-1] && rl[i] < rl[i-2] && rl[i] < rl[i+1] && rl[i] < rl[i+2]) sL.push(rl[i]);
     }
-    ctx.sr = {
+    return {
       resistance: sH.filter(v => v > price).sort((a,b) => a-b)[0] || Math.max(...rh),
       support: sL.filter(v => v < price).sort((a,b) => b-a)[0] || Math.min(...rl)
     };
-    return ctx;
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // SIGNAL ENGINE v4
+  // SIGNAL ENGINE v5
   //
-  // KEY CHANGES from v3:
+  // NEW FILTERS from v4:
   //
-  // 1. STRONG vs WEAK events
-  //    STRONG: EMA crossover, MACD crossover, Stochastic crossover
-  //    WEAK: CCI crossover, breakout, RSI exiting extreme
-  //    Need 1 STRONG event, or 2+ WEAK events — no more single CCI trigger
+  // 1. S/R PROXIMITY BLOCK
+  //    Don't BUY within 1 ATR of resistance
+  //    Don't SELL within 1 ATR of support
+  //    (That signal bought at 5034 with resistance at 5034 — insane)
   //
-  // 2. MACD DIRECTION CONFLICT
-  //    MACD histogram positive = don't sell (bullish momentum)
-  //    MACD histogram negative = don't buy (bearish momentum)
+  // 2. ADX MINIMUM 20 FOR TREND
+  //    ADX < 20 = no trend = NEUTRAL context
+  //    "With bullish trend" boost only when ADX >= 20
+  //    (That signal claimed bullish trend with ADX 17)
   //
-  // 3. NEUTRAL MOMENTUM BLOCK
-  //    If RSI is 40-60 AND Stoch is 35-65 = no momentum = BLOCK
-  //    (That garbage signal had RSI 47, Stoch 53 — pure neutral)
+  // 3. MINIMUM R:R 1.5
+  //    Reject any signal where R:R < 1.5
+  //    (That signal had 1:1 R:R — not worth the risk)
   //
-  // 4. No double counting (same as v3)
-  // 5. Against-trend blocking (same as v3)
+  // 4. RANGING MARKET BLOCK
+  //    If regime is RANGING and ADX < 20, don't send trend signals
+  //    Only mean-reversion at extremes would qualify
+  //
+  // KEPT from v4:
+  //  - Strong vs weak events
+  //  - MACD direction conflict
+  //  - Neutral momentum block
+  //  - No double counting
+  //  - Against-trend blocking
   // ═══════════════════════════════════════════════════════════════
   generateSignal(symbol, ind, ctx, currentPrice) {
-    // Two tiers of events
-    const buyStrong = [], sellStrong = [];   // EMA, MACD, Stoch crossovers
-    const buyWeak = [], sellWeak = [];       // CCI, breakout, RSI exit
+    const buyStrong = [], sellStrong = [];
+    const buyWeak = [], sellWeak = [];
     const buyState = [], sellState = [];
     const conflicts = [];
     const eventSources = new Set();
 
     // ─── STRONG EVENTS ───
 
-    // EMA 9/21 crossover
     if (ind.ema9 > ind.ema21 && ind.ema9Prev <= ind.ema21Prev) {
       buyStrong.push('EMA 9/21 bullish crossover'); eventSources.add('ema');
     } else if (ind.ema9 < ind.ema21 && ind.ema9Prev >= ind.ema21Prev) {
       sellStrong.push('EMA 9/21 bearish crossover'); eventSources.add('ema');
     }
 
-    // MACD crossover
     if (ind.macd && ind.macdPrev) {
       if (ind.macd.MACD > ind.macd.signal && ind.macdPrev.MACD <= ind.macdPrev.signal) {
         buyStrong.push('MACD bullish crossover'); eventSources.add('macd');
@@ -161,7 +180,6 @@ export class SignalEngine {
       }
     }
 
-    // Stochastic crossover in extreme zones (20/80)
     if (ind.stoch && ind.stochPrev) {
       if (ind.stoch.k < 20 && ind.stoch.k > ind.stoch.d && ind.stochPrev.k <= ind.stochPrev.d) {
         buyStrong.push('Stochastic bullish crossover (oversold)'); eventSources.add('stoch');
@@ -170,15 +188,13 @@ export class SignalEngine {
       }
     }
 
-    // ─── WEAK EVENTS (need 2+ of these OR 1 strong + these) ───
+    // ─── WEAK EVENTS ───
 
-    // CCI crossover — weak on its own
     if (ind.cci !== undefined && ind.cciPrev !== undefined) {
       if (ind.cci > -100 && ind.cciPrev <= -100) { buyWeak.push('CCI crossing above -100'); eventSources.add('cci'); }
       else if (ind.cci < 100 && ind.cciPrev >= 100) { sellWeak.push('CCI crossing below 100'); eventSources.add('cci'); }
     }
 
-    // Breakout — needs ADX > 22
     const rHigh = Math.max(...ind.recentHighs.slice(0, -1));
     const rLow = Math.min(...ind.recentLows.slice(0, -1));
     if (ind.price > rHigh && ind.adx && ind.adx.adx > 22) {
@@ -187,13 +203,12 @@ export class SignalEngine {
       sellWeak.push('Breakdown below recent low'); eventSources.add('breakout');
     }
 
-    // RSI exiting extreme
     if (ind.rsi && ind.rsiPrev) {
       if (ind.rsi > 30 && ind.rsiPrev <= 30) { buyWeak.push('RSI exiting oversold'); eventSources.add('rsi'); }
       else if (ind.rsi < 70 && ind.rsiPrev >= 70) { sellWeak.push('RSI exiting overbought'); eventSources.add('rsi'); }
     }
 
-    // ─── STATE SIGNALS (no double counting with events) ───
+    // ─── STATE SIGNALS (no double counting) ───
 
     if (!eventSources.has('ema')) {
       if (ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50) buyState.push('EMA bullish alignment (9>21>50)');
@@ -240,37 +255,33 @@ export class SignalEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CONFLICT DETECTION v4
+    // CONFLICT DETECTION (from v4 + new v5 additions)
     // ═══════════════════════════════════════════════════════════
 
-    // 1. Stochastic position conflicts
+    // Stochastic conflicts
     if (ind.stoch) {
       if (ind.stoch.k < 25) conflicts.push({ blocks: 'SELL', reason: `Stoch oversold (${ind.stoch.k.toFixed(0)})` });
       if (ind.stoch.k > 75) conflicts.push({ blocks: 'BUY', reason: `Stoch overbought (${ind.stoch.k.toFixed(0)})` });
     }
 
-    // 2. RSI extreme conflicts
+    // RSI conflicts
     if (ind.rsi < 30) conflicts.push({ blocks: 'SELL', reason: `RSI oversold (${ind.rsi.toFixed(0)})` });
     if (ind.rsi > 70) conflicts.push({ blocks: 'BUY', reason: `RSI overbought (${ind.rsi.toFixed(0)})` });
 
-    // 3. NEW: MACD DIRECTION CONFLICT
-    //    If MACD histogram is clearly positive, don't sell (bullish momentum)
-    //    If MACD histogram is clearly negative, don't buy (bearish momentum)
+    // MACD direction conflict
     if (ind.macd && !eventSources.has('macd')) {
-      if (ind.macd.histogram > 0) conflicts.push({ blocks: 'SELL', reason: `MACD histogram positive (+${ind.macd.histogram.toFixed(3)}) — bullish momentum` });
-      if (ind.macd.histogram < 0) conflicts.push({ blocks: 'BUY', reason: `MACD histogram negative (${ind.macd.histogram.toFixed(3)}) — bearish momentum` });
+      if (ind.macd.histogram > 0) conflicts.push({ blocks: 'SELL', reason: `MACD histogram positive (+${ind.macd.histogram.toFixed(3)})` });
+      if (ind.macd.histogram < 0) conflicts.push({ blocks: 'BUY', reason: `MACD histogram negative (${ind.macd.histogram.toFixed(3)})` });
     }
 
-    // 4. NEW: NEUTRAL MOMENTUM BLOCK
-    //    If both RSI and Stochastic are in neutral territory, there's no momentum
-    //    Don't trade when nothing is happening
+    // Neutral momentum block (RSI 40-60 AND Stoch 35-65)
     const rsiNeutral = ind.rsi >= 40 && ind.rsi <= 60;
     const stochNeutral = ind.stoch && ind.stoch.k >= 35 && ind.stoch.k <= 65;
     if (rsiNeutral && stochNeutral) {
-      conflicts.push({ blocks: 'BOTH', reason: `Neutral momentum (RSI:${ind.rsi.toFixed(0)} Stoch:${ind.stoch.k.toFixed(0)}) — no directional conviction` });
+      conflicts.push({ blocks: 'BOTH', reason: `Neutral momentum (RSI:${ind.rsi.toFixed(0)} Stoch:${ind.stoch.k.toFixed(0)})` });
     }
 
-    // 5. Bollinger extreme conflicts
+    // Bollinger extreme conflicts
     if (ind.bb) {
       const pB = (ind.price - ind.bb.lower) / (ind.bb.upper - ind.bb.lower);
       if (pB < 0.05) conflicts.push({ blocks: 'SELL', reason: 'Price at extreme lower BB' });
@@ -278,17 +289,43 @@ export class SignalEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // DECISION LOGIC v4
-    //
-    // Event requirement:
-    //   - 1 STRONG event (EMA/MACD/Stoch crossover), OR
-    //   - 2+ WEAK events (CCI/breakout/RSI exit)
-    //   Single weak event like CCI alone = NOT ENOUGH
-    //
-    // Plus:
-    //   - Total (events + states) >= minConfluence
-    //   - No blocking conflicts
-    //   - Buy total > Sell total
+    // NEW v5: S/R PROXIMITY CONFLICT
+    // Don't BUY within 1 ATR of resistance (buying at ceiling)
+    // Don't SELL within 1 ATR of support (selling at floor)
+    // ═══════════════════════════════════════════════════════════
+    const atrValue = ind.atr || currentPrice * 0.01;
+    const sr = ctx.sr;
+
+    if (sr.resistance > 0) {
+      const distToResistance = sr.resistance - currentPrice;
+      if (distToResistance >= 0 && distToResistance < atrValue * 1.0) {
+        conflicts.push({ blocks: 'BUY', reason: `Too close to resistance ${sr.resistance.toFixed(2)} (${distToResistance.toFixed(2)} away, need ${(atrValue * 1.0).toFixed(2)})` });
+      }
+    }
+
+    if (sr.support > 0) {
+      const distToSupport = currentPrice - sr.support;
+      if (distToSupport >= 0 && distToSupport < atrValue * 1.0) {
+        conflicts.push({ blocks: 'SELL', reason: `Too close to support ${sr.support.toFixed(2)} (${distToSupport.toFixed(2)} away, need ${(atrValue * 1.0).toFixed(2)})` });
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // NEW v5: RANGING MARKET BLOCK
+    // If ADX < 20 and regime is RANGING, block trend-following signals
+    // Only extreme mean-reversion signals (RSI < 30 or > 70) would pass
+    // ═══════════════════════════════════════════════════════════
+    const adxValue = ind.adx?.adx || 0;
+    if (ctx.regime === 'RANGING' && adxValue < 20) {
+      const hasExtremeRSI = ind.rsi < 30 || ind.rsi > 70;
+      const hasExtremeStoch = ind.stoch && (ind.stoch.k < 20 || ind.stoch.k > 80);
+      if (!hasExtremeRSI && !hasExtremeStoch) {
+        conflicts.push({ blocks: 'BOTH', reason: `Ranging market (ADX:${adxValue.toFixed(0)}) — no trend to follow` });
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DECISION LOGIC (same structure as v4)
     // ═══════════════════════════════════════════════════════════
 
     const totalBuyEvents = buyStrong.length + buyWeak.length;
@@ -296,11 +333,9 @@ export class SignalEngine {
     const totalBuy = totalBuyEvents + buyState.length;
     const totalSell = totalSellEvents + sellState.length;
 
-    // Check event quality
     const buyHasValidEvent = buyStrong.length >= 1 || buyWeak.length >= 2;
     const sellHasValidEvent = sellStrong.length >= 1 || sellWeak.length >= 2;
 
-    // Check conflicts
     const buyConflicts = conflicts.filter(c => c.blocks === 'BUY' || c.blocks === 'BOTH');
     const sellConflicts = conflicts.filter(c => c.blocks === 'SELL' || c.blocks === 'BOTH');
 
@@ -328,31 +363,28 @@ export class SignalEngine {
       else if (sellStrong.length >= 1) confidence = Math.min(confidence + 5, 88);
     }
 
-    // Report why blocked
+    // Report blocks
     if (action === 'HOLD') {
-      if (totalBuyEvents > 0 && buyConflicts.length > 0) {
+      if (totalBuyEvents > 0 && buyConflicts.length > 0)
         warnings = buyConflicts.map(c => `BLOCKED BUY: ${c.reason}`);
-      } else if (totalSellEvents > 0 && sellConflicts.length > 0) {
+      else if (totalSellEvents > 0 && sellConflicts.length > 0)
         warnings = sellConflicts.map(c => `BLOCKED SELL: ${c.reason}`);
-      } else if (totalBuyEvents > 0 && !buyHasValidEvent) {
-        warnings.push(`Weak event only (need 1 strong or 2+ weak)`);
-      } else if (totalSellEvents > 0 && !sellHasValidEvent) {
-        warnings.push(`Weak event only (need 1 strong or 2+ weak)`);
-      }
+      else if (totalBuyEvents > 0 && !buyHasValidEvent)
+        warnings.push('Weak event only (need 1 strong or 2+ weak)');
+      else if (totalSellEvents > 0 && !sellHasValidEvent)
+        warnings.push('Weak event only (need 1 strong or 2+ weak)');
     }
 
     // ── CONTEXT ADJUSTMENTS ──
     if (action !== 'HOLD') {
 
-      // HARD BLOCK against strong trend (ADX > 30)
-      if (action === 'BUY' && ctx.trend === 'BEARISH' && ctx.trendStrength > 30) {
-        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [], ['BLOCKED: Strong bearish trend (ADX>' + ctx.trendStrength.toFixed(0) + ')'], 0, 0, 0);
-      }
-      if (action === 'SELL' && ctx.trend === 'BULLISH' && ctx.trendStrength > 30) {
-        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [], ['BLOCKED: Strong bullish trend (ADX>' + ctx.trendStrength.toFixed(0) + ')'], 0, 0, 0);
-      }
+      // Hard block against strong trend (ADX > 30)
+      if (action === 'BUY' && ctx.trend === 'BEARISH' && ctx.trendStrength > 30)
+        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [], ['BLOCKED: Strong bearish trend (ADX:' + ctx.trendStrength.toFixed(0) + ')'], 0, 0, 0);
+      if (action === 'SELL' && ctx.trend === 'BULLISH' && ctx.trendStrength > 30)
+        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [], ['BLOCKED: Strong bullish trend (ADX:' + ctx.trendStrength.toFixed(0) + ')'], 0, 0, 0);
 
-      // Moderate penalty against weak trend
+      // Against weak trend penalty
       if (action === 'BUY' && ctx.trend === 'BEARISH') {
         confidence = Math.round(confidence * 0.5);
         warnings.push('Against bearish trend (-50%)');
@@ -362,14 +394,14 @@ export class SignalEngine {
         warnings.push('Against bullish trend (-50%)');
       }
 
-      // Boost with-trend
-      if (action === 'BUY' && ctx.trend === 'BULLISH') {
+      // With-trend boost — ONLY if ADX confirms (>= 20)
+      if (action === 'BUY' && ctx.trend === 'BULLISH' && ctx.trendStrength >= 20) {
         confidence = Math.min(Math.round(confidence * 1.15), 90);
-        reasons.push('With bullish trend');
+        reasons.push(`With bullish trend (ADX:${ctx.trendStrength.toFixed(0)})`);
       }
-      if (action === 'SELL' && ctx.trend === 'BEARISH') {
+      if (action === 'SELL' && ctx.trend === 'BEARISH' && ctx.trendStrength >= 20) {
         confidence = Math.min(Math.round(confidence * 1.15), 90);
-        reasons.push('With bearish trend');
+        reasons.push(`With bearish trend (ADX:${ctx.trendStrength.toFixed(0)})`);
       }
 
       // Session
@@ -383,32 +415,66 @@ export class SignalEngine {
         warnings.push('Asian session (-15%)');
       }
 
-      // High volatility
       if (ctx.volatility === 'HIGH') {
         confidence = Math.round(confidence * 0.9);
         warnings.push('High volatility');
       }
 
-      // Min confidence floor
-      if (confidence < 40) {
+      // Confidence floor
+      if (confidence < 40)
         return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [], ['Confidence too low after adjustments'], 0, 0, 0);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // NEW v5: CALCULATE SL/TP AND CHECK R:R BEFORE SENDING
+    // ═══════════════════════════════════════════════════════════
+    const slMul = ctx.volatility === 'HIGH' ? 2.5 : 2.0;
+    let stopLoss = 0, takeProfit = 0, riskReward = 0;
+
+    if (action !== 'HOLD') {
+      if (action === 'BUY') {
+        stopLoss = currentPrice - (atrValue * slMul);
+        // TP: aim for resistance or ATR-based, whichever is FURTHER
+        const atrTP = currentPrice + (atrValue * slMul * this.minRR);
+        const resistanceTP = sr.resistance > currentPrice ? sr.resistance : atrTP;
+        takeProfit = Math.max(atrTP, resistanceTP);
+      } else {
+        stopLoss = currentPrice + (atrValue * slMul);
+        const atrTP = currentPrice - (atrValue * slMul * this.minRR);
+        const supportTP = sr.support < currentPrice ? sr.support : atrTP;
+        takeProfit = Math.min(atrTP, supportTP);
+      }
+
+      // Calculate actual R:R
+      const risk = Math.abs(currentPrice - stopLoss);
+      const reward = Math.abs(takeProfit - currentPrice);
+      riskReward = risk > 0 ? parseFloat((reward / risk).toFixed(2)) : 0;
+
+      // R:R CHECK — reject if below minimum
+      if (riskReward < this.minRR) {
+        return this.buildResult(symbol, 'HOLD', 0, currentPrice, ind, ctx, [],
+          [`R:R too low (${riskReward} < ${this.minRR} minimum)`], 0, 0, 0);
       }
     }
 
-    return this.buildResult(symbol, action, confidence, currentPrice, ind, ctx, reasons, warnings, confluenceCount, eventCount, stateCount);
+    return {
+      symbol, action, confidence, price: currentPrice, stopLoss, takeProfit, riskReward,
+      reasons, warnings,
+      context: { trend: ctx.trend, trendStrength: ctx.trendStrength, regime: ctx.regime, session: ctx.session, volatility: ctx.volatility, support: ctx.sr.support, resistance: ctx.sr.resistance },
+      confluenceCount, eventCount, stateCount,
+      indicators: {
+        rsi: ind.rsi?.toFixed(2), macd: ind.macd?.histogram?.toFixed(5), adx: ind.adx?.adx?.toFixed(2),
+        atr: atrValue?.toFixed(5), stochK: ind.stoch?.k?.toFixed(2), stochD: ind.stoch?.d?.toFixed(2),
+        cci: ind.cci?.toFixed(2), ema9: ind.ema9?.toFixed(5), ema21: ind.ema21?.toFixed(5), ema50: ind.ema50?.toFixed(5)
+      },
+      timestamp: Date.now()
+    };
   }
 
   buildResult(symbol, action, confidence, currentPrice, ind, ctx, reasons, warnings, confluenceCount, eventCount, stateCount) {
     const atrValue = ind.atr || currentPrice * 0.01;
-    const slMul = ctx.volatility === 'HIGH' ? 2.5 : 2.0;
-    const tpMul = ctx.regime === 'TRENDING' ? 3.0 : 2.0;
-    let stopLoss = 0, takeProfit = 0;
-    if (action === 'BUY') { stopLoss = currentPrice - (atrValue * slMul); takeProfit = currentPrice + (atrValue * tpMul); }
-    else if (action === 'SELL') { stopLoss = currentPrice + (atrValue * slMul); takeProfit = currentPrice - (atrValue * tpMul); }
-
     return {
-      symbol, action, confidence, price: currentPrice, stopLoss, takeProfit,
-      riskReward: action !== 'HOLD' ? parseFloat((tpMul / slMul).toFixed(2)) : 0,
+      symbol, action, confidence, price: currentPrice, stopLoss: 0, takeProfit: 0, riskReward: 0,
       reasons, warnings,
       context: { trend: ctx.trend, trendStrength: ctx.trendStrength, regime: ctx.regime, session: ctx.session, volatility: ctx.volatility, support: ctx.sr.support, resistance: ctx.sr.resistance },
       confluenceCount, eventCount, stateCount,
