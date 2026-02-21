@@ -9,12 +9,17 @@ export class MarketDataService extends EventEmitter {
     this.apiKey = process.env.TWELVE_DATA_API_KEY;
     this.candleBuffers = new Map();
 
-    // ── NEW: 15min secondary timeframe buffer ──
+    // 15min secondary timeframe buffer
     this.candleBuffers15m = new Map();
     this.lastCandle15mTimestamps = new Map();
 
+    // 1h macro timeframe buffer
+    this.candleBuffers1h = new Map();
+    this.lastCandle1hTimestamps = new Map();
+
     this.pollInterval = null;
-    this.poll15mInterval = null; // Separate poll for 15min
+    this.poll15mInterval = null;
+    this.poll1hInterval = null;
 
     // ── RATE LIMIT MANAGEMENT ──
     this.apiCreditsUsed = 0;
@@ -48,21 +53,29 @@ export class MarketDataService extends EventEmitter {
     console.log(`⏱️ Timeframe: ${tf} → ${normalized}`);
     return normalized;
   }
+
+  // ── FETCH 1H HISTORICAL FOR MACRO TREND ──
   async fetchHistorical1h(symbol) {
     try {
-      const response = await this.client.get('/time_series', {
-        params: { symbol, interval: '1h', outputsize: 200, apikey: this.apiKey }
-      });
-      if (response.data.status === 'error') return [];
-      return (response.data.values || []).reverse().map(v => ({
+      console.log(`   Fetching ${symbol} (1h macro)...`);
+      const data = await this.apiCall({
         symbol,
-        timestamp: new Date(v.datetime).getTime(),
-        open: parseFloat(v.open), high: parseFloat(v.high),
-        low: parseFloat(v.low), close: parseFloat(v.close),
-        volume: parseFloat(v.volume || 0)
-      }));
+        interval: '1h',
+        outputsize: 200
+      });
+
+      if (!data?.values) {
+        console.warn(`   ⚠️ No 1h data for ${symbol}`);
+        return [];
+      }
+
+      const candles = this._parseCandles(symbol, data.values);
+      this.candleBuffers1h.set(symbol, candles);
+      this.lastCandle1hTimestamps.set(symbol, candles[candles.length - 1].timestamp);
+      console.log(`   ✅ 1h: ${candles.length} candles for ${symbol} (Macro loaded)`);
+      return candles;
     } catch (err) {
-      console.error('1h fetch error:', err.message);
+      console.error(`   ❌ 1h fetch error for ${symbol}:`, err.message);
       return [];
     }
   }
@@ -78,12 +91,14 @@ export class MarketDataService extends EventEmitter {
     const intervalMs = this.getSmartInterval();
     console.log(`⏱ Smart polling every ${intervalMs / 1000} seconds (5min)`);
     console.log(`⏱ 15min polling every 910 seconds`);
-    console.log(`   Estimated daily API calls: ~${this.estimateDailyCalls(intervalMs)} (5min) + ~${this.estimateDailyCalls(910000)} (15min)\n`);
+    console.log(`⏱ 1h macro polling every 3600 seconds`);
+    console.log(`   Estimated daily API calls: ~${this.estimateDailyCalls(intervalMs)} (5min) + ~${this.estimateDailyCalls(910000)} (15min) + ~${this.estimateDailyCalls(3600000)} (1h)\n`);
 
     // First fetch
     console.log('🔍 Fetching first real-time data...\n');
     await this.fetchLatestCandles();
     await this.fetchLatest15mCandles();
+    await this.fetchLatest1hCandles();
 
     this.pollInterval = setInterval(() => {
       this.fetchLatestCandles();
@@ -93,6 +108,11 @@ export class MarketDataService extends EventEmitter {
     this.poll15mInterval = setInterval(() => {
       this.fetchLatest15mCandles();
     }, 910000);
+
+    // Poll 1h candles every hour (3605s)
+    this.poll1hInterval = setInterval(() => {
+      this.fetchLatest1hCandles();
+    }, 3605000);
   }
 
   getSmartInterval() {
@@ -222,7 +242,7 @@ export class MarketDataService extends EventEmitter {
       const data15m = await this.apiCall({
         symbol,
         interval: '15min',
-        outputsize: 150  // 150 × 15min = ~37.5 hours of history
+        outputsize: 150
       });
 
       if (data15m?.values) {
@@ -241,7 +261,51 @@ export class MarketDataService extends EventEmitter {
     console.log(`📥 Historical data complete (API credits used: ${this.apiCreditsDaily})\n`);
   }
 
-  // ── NEW: Fetch latest 15min candles ──
+  // ── FETCH LATEST 1H CANDLES (live polling) ──
+  async fetchLatest1hCandles() {
+    if (!this.isHealthy) return;
+
+    for (const symbol of this.symbols) {
+      const data = await this.apiCall({
+        symbol,
+        interval: '1h',
+        outputsize: 3
+      });
+
+      if (!data?.values) continue;
+
+      for (const v of data.values.reverse()) {
+        const candle = {
+          symbol,
+          timestamp: new Date(v.datetime).getTime(),
+          open: parseFloat(v.open),
+          high: parseFloat(v.high),
+          low: parseFloat(v.low),
+          close: parseFloat(v.close),
+          volume: parseFloat(v.volume || 0)
+        };
+
+        const buffer = this.candleBuffers1h.get(symbol) || [];
+        const lastCandle = buffer[buffer.length - 1];
+
+        if (!lastCandle || candle.timestamp > lastCandle.timestamp) {
+          buffer.push(candle);
+          if (buffer.length > 300) buffer.shift();
+          this.candleBuffers1h.set(symbol, buffer);
+          this.lastCandle1hTimestamps.set(symbol, candle.timestamp);
+          this.emit('candle1h', candle);
+        } else if (candle.timestamp === lastCandle.timestamp) {
+          buffer[buffer.length - 1] = candle;
+          this.candleBuffers1h.set(symbol, buffer);
+          this.emit('candle1h', candle);
+        }
+      }
+
+      await this.sleep(800);
+    }
+  }
+
+  // ── FETCH LATEST 15MIN CANDLES ──
   async fetchLatest15mCandles() {
     if (!this.isHealthy) return;
 
@@ -355,9 +419,12 @@ export class MarketDataService extends EventEmitter {
     return this.candleBuffers.get(symbol) || [];
   }
 
-  // ── NEW: Get 15min candles ──
   getCandles15m(symbol) {
     return this.candleBuffers15m.get(symbol) || [];
+  }
+
+  getCandles1h(symbol) {
+    return this.candleBuffers1h.get(symbol) || [];
   }
 
   getIntervalMs() {
@@ -404,6 +471,9 @@ export class MarketDataService extends EventEmitter {
       ),
       candleBuffer15mSizes: Object.fromEntries(
         this.symbols.map(s => [s, (this.candleBuffers15m.get(s) || []).length])
+      ),
+      candleBuffer1hSizes: Object.fromEntries(
+        this.symbols.map(s => [s, (this.candleBuffers1h.get(s) || []).length])
       )
     };
   }
@@ -415,5 +485,6 @@ export class MarketDataService extends EventEmitter {
   stop() {
     if (this.pollInterval) clearInterval(this.pollInterval);
     if (this.poll15mInterval) clearInterval(this.poll15mInterval);
+    if (this.poll1hInterval) clearInterval(this.poll1hInterval);
   }
 }
