@@ -1,0 +1,49 @@
+{
+  "config": {
+    "SYMBOL": "BTC/USD",
+    "DAYS": 60,
+    "MIN_CONFIDENCE": 55,
+    "TIMEFRAME": "5min"
+  },
+  "allSignals": {
+    "totalCandles": 5000,
+    "totalSignals": 1
+  },
+  "results": [
+    {
+      "timestamp": 1771488000000,
+      "symbol": "BTC/USD",
+      "action": "SELL",
+      "entryPrice": 66404.95,
+      "stopLoss": 66454.62385566422,
+      "takeProfit": 66097.81144335787,
+      "riskReward": 6.18,
+      "confidence": 71,
+      "confluenceCount": 4,
+      "reasons": [
+        "MACD bearish crossover",
+        "EMA bearish alignment (9<21<50)",
+        "Price below EMA 21 & 50",
+        "ADX bearish (49)",
+        "With bearish trend (ADX:49)",
+        "Bearish price structure",
+        "Strong resistance nearby (str:100)"
+      ],
+      "context": {
+        "trend": "BEARISH",
+        "trendStrength": 48.64048256600703,
+        "regime": "TRENDING",
+        "session": "ASIAN",
+        "volatility": "NORMAL",
+        "support": 66286.23,
+        "resistance": 66423.91,
+        "supportLevels": "66286.23 (str:100 touches:1)",
+        "resistanceLevels": "66423.91 (str:100 touches:1) | 66662.42 (str:100 touches:6) | 66741.30 (str:100 touches:4)"
+      },
+      "outcome": "WIN",
+      "exitPrice": 66097.81144335787,
+      "candlesHeld": 6,
+      "pnlR": 6.18
+    }
+  ]
+}
