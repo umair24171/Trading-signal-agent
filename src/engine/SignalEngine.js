@@ -549,11 +549,36 @@ export class SignalEngine {
       if (ctx.session === 'OVERLAP') { confidence = Math.min(Math.round(confidence * 1.1), 90); reasons.push('London/NY overlap'); }
       else if (ctx.session === 'LONDON' || ctx.session === 'NEW_YORK') confidence = Math.min(Math.round(confidence * 1.05), 90);
       else if (ctx.session === 'ASIAN') { confidence = Math.round(confidence * 0.85); warnings.push('Asian session (-15%)'); }
+      else if (ctx.session === 'OFF_HOURS') {
+        return this.holdResult(symbol, currentPrice, ind, ctx, momentum, ['OFF_HOURS session — market closed/dead, no trading']);
+      }
 
       if (ctx.volatility === 'HIGH') { confidence = Math.round(confidence * 0.9); warnings.push('High volatility'); }
 
       if (confidence < 40)
         return this.holdResult(symbol, currentPrice, ind, ctx, momentum, ['Confidence too low after adjustments']);
+    }
+
+    // ── ADX=0 GUARD (calculation error check) ──
+    // ADX returning 0 means indicator calculation failed — skip signal
+    if (action !== 'HOLD') {
+      const adxCheck = ind.adx?.adx || 0;
+      if (adxCheck === 0 && action !== 'HOLD') {
+        return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+          ['ADX calculation error (returned 0) — skipping signal']);
+      }
+    }
+
+    // ── ATR MINIMUM GUARD ──
+    // XAU/USD: if ATR < $2, volatility is too low to produce clean moves
+    // Signals 4,5,6 had ATR of $0.24 — essentially untradeable noise level
+    if (symbol.includes('XAU') && atrValue < 2.0) {
+      return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+        [`ATR too low (${atrValue.toFixed(2)}) — ultra-squeeze, not tradeable`]);
+    }
+    if (symbol.includes('BTC') && atrValue < 50) {
+      return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+        [`ATR too low (${atrValue.toFixed(2)}) — ultra-squeeze, not tradeable`]);
     }
 
     // ── SL/TP CALCULATION ──
