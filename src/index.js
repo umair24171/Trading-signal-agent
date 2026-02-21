@@ -15,7 +15,7 @@ let agentInstance = null;
 http.createServer((req, res) => {
   const health = agentInstance?.getHealthStatus() || {};
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'running', agent: 'Trading Signal Agent v2', uptime: process.uptime(), uptimeFormatted: formatUptime(process.uptime()), ...health }, null, 2));
+  res.end(JSON.stringify({ status: 'running', agent: 'Trading Signal Agent v3 (MTF)', uptime: process.uptime(), uptimeFormatted: formatUptime(process.uptime()), ...health }, null, 2));
 }).listen(PORT, () => {
   console.log(`🌐 Health server running on port ${PORT}`);
 });
@@ -28,15 +28,16 @@ function formatUptime(seconds) {
 
 console.log(`
 ╔══════════════════════════════════════════════════════════════╗
-║         TRADING SIGNAL AGENT v2 - STARTING UP                ║
+║         TRADING SIGNAL AGENT v3 - STARTING UP                ║
 ║                                                              ║
 ║  Watchlist: ${(process.env.WATCHLIST || '').padEnd(43)}║
 ║  Timeframe: ${(process.env.TIMEFRAME || '5m').padEnd(43)}║
+║  MTF Filter: 15min EMA alignment                             ║
 ║  Min Confidence: ${((process.env.MIN_CONFIDENCE || '60') + '%').padEnd(38)}║
 ║  Min Confluence: ${((process.env.MIN_CONFLUENCE || '3') + ' signals').padEnd(38)}║
 ║  MT5 Auto-Execute: ${(process.env.MT5_ENABLED === 'true' ? 'ON' : 'OFF').padEnd(36)}║
 ║                                                              ║
-║  NEW: SR Detector v2, Win Rate Tracker, Backtest Engine      ║
+║  NEW v3: Multi-Timeframe 15min Confirmation Filter           ║
 ╚══════════════════════════════════════════════════════════════╝
 `);
 
@@ -51,7 +52,7 @@ class TradingAgent {
     this.signalEngine = new SignalEngine({ minConfluence: this.minConfluence });
     this.telegram = new TelegramService();
     this.mt5 = new MT5Bridge();
-    this.tracker = new WinRateTracker(this.telegram); // ← WIN RATE TRACKER
+    this.tracker = new WinRateTracker(this.telegram);
 
     this.lastSignals = new Map();
     this.signalCooldown = parseInt(process.env.SIGNAL_COOLDOWN_MINS) || 15;
@@ -62,36 +63,61 @@ class TradingAgent {
   async start() {
     console.log('🚀 Agent starting...\n');
 
-    // Print current tracker stats on startup
     this.tracker.printReport();
 
     await this.telegram.sendMessage(`
-🤖 *Trading Agent v2 Started*
+🤖 *Trading Agent v3 Started*
 
 📊 Watching: ${this.watchlist.join(', ')}
-⏱ Timeframe: ${this.timeframe}
+⏱ Timeframe: ${this.timeframe} + 15min MTF
 🎯 Min Confidence: ${this.minConfidence}%
 🔗 Min Confluence: ${this.minConfluence} signals
 
-*New v2 Features:*
-• SR Detector v2 (clustered swing levels with strength scores)
+*v3 Features:*
+• ✅ Multi-Timeframe 15min Confirmation (NEW)
+• SR Detector v2 (clustered swing levels)
 • Win Rate Tracker (auto SL/TP hit detection)
-• Backtest engine available (run: node src/backtest.js)
+• Backtest engine available
 
 📊 Tracker: ${this.tracker.getStats().total} closed signals | ${this.tracker.getStats().winRate}% win rate
     `);
 
+    // Fetch historical data (5min + 15min)
     await this.marketData.fetchHistoricalData();
 
+    // Load 5min historical into engine
     for (const symbol of this.watchlist) {
       const historicalCandles = this.marketData.getCandles(symbol);
       if (historicalCandles.length > 0) {
         this.signalEngine.loadHistoricalCandles(symbol, historicalCandles);
       }
     }
-    console.log('📊 Indicators warmed up with historical data\n');
 
+    // Load 15min historical into engine for MTF
+    for (const symbol of this.watchlist) {
+      const candles15m = this.marketData.getCandles15m(symbol);
+      if (candles15m.length > 0) {
+        this.signalEngine.loadMTFCandles(symbol, candles15m);
+      }
+      const candles1h = await marketData.fetchHistorical1h(symbol);
+if (candles1h.length > 0) signalEngine.loadMacroCandles(symbol, candles1h);
+    }
+
+    console.log('📊 Indicators warmed up (5min + 15min MTF)\n');
+
+    // Wire 5min candle events
     this.marketData.on('candle', (candle) => this.processCandle(candle));
+
+    // Wire 15min candle events into engine
+    this.marketData.on('candle1h', (candle) => {
+      this.signalEngine.addMTFCandle(candle);
+    });
+
+    // Handle initial 15min load (fires during fetchHistoricalData)
+    this.marketData.on('candles15mLoaded', (symbol, candles) => {
+      this.signalEngine.loadMTFCandles(symbol, candles);
+    });
+
     this.marketData.on('error', (err) => {
       console.error('❌ Market data error:', err.message);
       this.telegram.sendError(`Market data error: ${err.message}`).catch(() => {});
@@ -114,7 +140,7 @@ class TradingAgent {
     const signal = this.signalEngine.analyze(candle.symbol);
     this.stats.totalAnalyses++;
 
-    // ── UPDATE WIN RATE TRACKER on every candle ──
+    // Update win rate tracker on every candle
     this.tracker.updatePrice(candle.symbol, candle.close, candle.high, candle.low);
 
     if (!signal) return;
@@ -160,10 +186,7 @@ class TradingAgent {
     console.log(`   Reasons: ${signal.reasons.join(', ')}`);
     console.log(`${'═'.repeat(60)}\n`);
 
-    // Send notification
     await this.telegram.sendSignal(signal);
-
-    // ── LOG TO WIN RATE TRACKER ──
     this.tracker.logSignal(signal);
 
     if (process.env.MT5_ENABLED === 'true') await this.mt5.executeSignal(signal);
@@ -205,7 +228,6 @@ class TradingAgent {
       apiCreditsUsed: health.apiCreditsUsedToday,
       apiDailyLimit: 800,
       uptime: formatUptime(process.uptime()),
-      // Tracker stats
       winRate: trackerStats.winRate,
       totalR: trackerStats.totalR,
       profitFactor: trackerStats.profitFactor
@@ -225,7 +247,8 @@ class TradingAgent {
       marketData: dataHealth,
       config: {
         minConfidence: this.minConfidence, minConfluence: this.minConfluence,
-        cooldownMins: this.signalCooldown, timeframe: this.timeframe, watchlist: this.watchlist
+        cooldownMins: this.signalCooldown, timeframe: this.timeframe,
+        watchlist: this.watchlist, mtfEnabled: true
       }
     };
   }
@@ -242,7 +265,6 @@ agent.start().catch(async (err) => {
 
 const shutdown = async (signal) => {
   console.log(`\n👋 Received ${signal}, shutting down...`);
-  // Print final tracker report before shutdown
   agent.tracker.printReport();
   agent.marketData.stop();
   try { await agent.telegram.sendMessage('👋 *Trading Agent shutting down...*'); } catch (e) {}

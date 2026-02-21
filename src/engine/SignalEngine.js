@@ -6,12 +6,109 @@ export class SignalEngine {
     this.candleStore = new Map();
     this.minConfluence = config.minConfluence || 3;
     this.minRR = config.minRR || 1.5;
-    this.srDetector = new SRDetector(); // v2 S/R detection
+    this.srDetector = new SRDetector();
+    this.mtfCandles = new Map();   // 15min candle store for MTF
+    this.macroCandles = new Map(); // 1h candle store for macro trend
   }
 
   loadHistoricalCandles(symbol, candles) {
     this.candleStore.set(symbol, [...candles]);
     console.log(`   📊 SignalEngine: Loaded ${candles.length} historical candles for ${symbol}`);
+  }
+
+  // ── MTF: Load 15min historical candles ──
+  loadMTFCandles(symbol, candles15m) {
+    this.mtfCandles.set(symbol, [...candles15m]);
+    console.log(`   📊 MTF: Loaded ${candles15m.length} × 15min candles for ${symbol}`);
+  }
+
+  // ── MTF: Add/update a single 15min candle ──
+  addMTFCandle(candle) {
+    if (!this.mtfCandles.has(candle.symbol)) this.mtfCandles.set(candle.symbol, []);
+    const store = this.mtfCandles.get(candle.symbol);
+    const last = store[store.length - 1];
+    if (last && last.timestamp === candle.timestamp) store[store.length - 1] = candle;
+    else {
+      store.push(candle);
+      if (store.length > 300) store.shift();
+    }
+  }
+
+  // ── MACRO: 1h trend (data-proven: XAU SELL=0% WR in bull run) ──
+  loadMacroCandles(symbol, candles1h) {
+    this.macroCandles.set(symbol, [...candles1h]);
+    console.log(`   📊 Macro: Loaded ${candles1h.length} × 1h candles for ${symbol}`);
+  }
+
+  addMacroCandle(candle) {
+    if (!this.macroCandles.has(candle.symbol)) this.macroCandles.set(candle.symbol, []);
+    const store = this.macroCandles.get(candle.symbol);
+    const last = store[store.length - 1];
+    if (last && last.timestamp === candle.timestamp) store[store.length - 1] = candle;
+    else { store.push(candle); if (store.length > 300) store.shift(); }
+  }
+
+  getMacroTrend(symbol) {
+    const candles = this.macroCandles.get(symbol);
+    if (!candles || candles.length < 55) {
+      return { trend: 'NEUTRAL', reason: 'Insufficient 1h data', strength: 'NONE' };
+    }
+    const closes = candles.map(c => c.close);
+    const ema21arr = EMA.calculate({ values: closes, period: 21 });
+    const ema50arr = EMA.calculate({ values: closes, period: 50 });
+    const ema100arr = EMA.calculate({ values: closes, period: Math.min(100, closes.length - 1) });
+    if (!ema21arr.length || !ema50arr.length) return { trend: 'NEUTRAL', reason: '1h EMA failed', strength: 'NONE' };
+    const e21 = ema21arr[ema21arr.length - 1];
+    const e50 = ema50arr[ema50arr.length - 1];
+    const e100 = ema100arr.length > 0 ? ema100arr[ema100arr.length - 1] : null;
+    const price = closes[closes.length - 1];
+    let bull = 0, bear = 0;
+    if (price > e21) bull++; else bear++;
+    if (price > e50) bull++; else bear++;
+    if (e21 > e50) bull++; else bear++;
+    if (e100 !== null) { if (price > e100) bull++; else bear++; }
+    const total = e100 !== null ? 4 : 3;
+    if (bull === total) return { trend: 'BULLISH', strength: 'STRONG', reason: `1h macro: ${bull}/${total} bullish` };
+    if (bear === total) return { trend: 'BEARISH', strength: 'STRONG', reason: `1h macro: ${bear}/${total} bearish` };
+    if (bull >= total - 1) return { trend: 'BULLISH', strength: 'MODERATE', reason: `1h macro: ${bull}/${total} bullish` };
+    if (bear >= total - 1) return { trend: 'BEARISH', strength: 'MODERATE', reason: `1h macro: ${bear}/${total} bearish` };
+    return { trend: 'NEUTRAL', strength: 'WEAK', reason: `1h macro mixed (Bull:${bull} Bear:${bear})` };
+  }
+
+  // ── MTF: Calculate 15min trend using EMA alignment ──
+  // Returns: 'BULLISH' | 'BEARISH' | 'NEUTRAL' with strength STRONG/MODERATE/WEAK/NONE
+  getMTFTrend(symbol) {
+    const candles = this.mtfCandles.get(symbol);
+    if (!candles || candles.length < 55) {
+      return { trend: 'NEUTRAL', reason: 'Insufficient 15min data', strength: 'NONE' };
+    }
+
+    const closes = candles.map(c => c.close);
+    const ema9arr = EMA.calculate({ values: closes, period: 9 });
+    const ema21arr = EMA.calculate({ values: closes, period: 21 });
+    const ema50arr = EMA.calculate({ values: closes, period: 50 });
+
+    if (!ema9arr.length || !ema21arr.length || !ema50arr.length) {
+      return { trend: 'NEUTRAL', reason: 'EMA calculation failed', strength: 'NONE' };
+    }
+
+    const e9 = ema9arr[ema9arr.length - 1];
+    const e21 = ema21arr[ema21arr.length - 1];
+    const e50 = ema50arr[ema50arr.length - 1];
+    const price = closes[closes.length - 1];
+
+    let bullishCount = 0, bearishCount = 0;
+    if (e9 > e21) bullishCount++; else bearishCount++;
+    if (e21 > e50) bullishCount++; else bearishCount++;
+    if (price > e50) bullishCount++; else bearishCount++;
+    if (price > e21) bullishCount++; else bearishCount++;
+
+    if (bullishCount === 4) return { trend: 'BULLISH', strength: 'STRONG', reason: `15min: 4/4 bullish (EMA9>21>50, Price>EMA21>50)`, e9, e21, e50 };
+    if (bearishCount === 4) return { trend: 'BEARISH', strength: 'STRONG', reason: `15min: 4/4 bearish (EMA9<21<50, Price<EMA21<50)`, e9, e21, e50 };
+    if (bullishCount >= 3) return { trend: 'BULLISH', strength: 'MODERATE', reason: `15min: ${bullishCount}/4 bullish conditions`, e9, e21, e50 };
+    if (bearishCount >= 3) return { trend: 'BEARISH', strength: 'MODERATE', reason: `15min: ${bearishCount}/4 bearish conditions`, e9, e21, e50 };
+
+    return { trend: 'NEUTRAL', strength: 'WEAK', reason: `15min mixed (Bull:${bullishCount} Bear:${bearishCount})`, e9, e21, e50 };
   }
 
   addCandle(candle) {
@@ -24,9 +121,8 @@ export class SignalEngine {
 
   analyze(symbol) {
     const candles = this.candleStore.get(symbol);
-    if (!candles || candles.length < 110) return null; // Need 110 for EMA100
+    if (!candles || candles.length < 110) return null;
 
-    // Set current candle time for session detection (backtest uses historical time)
     if (!this.currentCandleTime) {
       this.currentCandleTime = candles[candles.length - 1].timestamp;
     }
@@ -49,7 +145,7 @@ export class SignalEngine {
       const ema9 = EMA.calculate({ values: closes, period: 9 });
       const ema21 = EMA.calculate({ values: closes, period: 21 });
       const ema50 = EMA.calculate({ values: closes, period: 50 });
-      const ema100 = EMA.calculate({ values: closes, period: 100 }); // Macro trend filter
+      const ema100 = EMA.calculate({ values: closes, period: 100 });
       const sma200 = SMA.calculate({ values: closes, period: Math.min(200, closes.length - 1) });
       const bb = BollingerBands.calculate({ values: closes, period: 20, stdDev: 2 });
       const atr = ATR.calculate({ high: highs, low: lows, close: closes, period: 14 });
@@ -71,21 +167,17 @@ export class SignalEngine {
         bb: bb[bb.length - 1],
         atr: atr[atr.length - 1], atr7: atr7.length > 0 ? atr7[atr7.length - 1] : atr[atr.length - 1],
         atrPrev: atr.length > 5 ? atr[atr.length - 5] : atr[atr.length - 1],
-        atrHistory: atr.slice(-10), // For volatility expansion check
+        atrHistory: atr.slice(-10),
         stoch: stoch[stoch.length - 1], stochPrev: stoch.length > 1 ? stoch[stoch.length - 2] : null,
         stochHistory: stoch.slice(-6),
         adx: adx[adx.length - 1],
         cci: cci[cci.length - 1], cciPrev: cci.length > 1 ? cci[cci.length - 2] : null,
         recentHighs: highs.slice(-30), recentLows: lows.slice(-30), recentCloses: closes.slice(-30),
-        // Pass full arrays for SRDetector v2
         allHighs: highs, allLows: lows, allCloses: closes
       };
     } catch (err) { console.error('Indicator error:', err.message); return null; }
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // v6 MOMENTUM ANALYZER (unchanged)
-  // ═══════════════════════════════════════════════════════════════
   analyzeMomentum(candles, ind) {
     const recent = candles.slice(-8);
     const momentum = {
@@ -163,7 +255,6 @@ export class SignalEngine {
     }
     if (ind.bb) { const w = (ind.bb.upper - ind.bb.lower) / ind.bb.middle; if (w < 0.005) ctx.volatility = 'SQUEEZE'; }
 
-    // Use candle timestamp in backtest mode, current time in live mode
     const h = new Date(this.currentCandleTime || Date.now()).getUTCHours();
     if (h >= 12 && h < 16) ctx.session = 'OVERLAP';
     else if (h >= 7 && h < 16) ctx.session = 'LONDON';
@@ -175,13 +266,11 @@ export class SignalEngine {
     const rL = Math.min(...lows.slice(-20, -1));
     if ((ind.price > rH || ind.price < rL) && adxValue >= 20) ctx.regime = 'BREAKOUT';
 
-    // ── v2 S/R DETECTION ──
     ctx.sr = this.srDetector.findSR(closes, highs, lows, ind.atr);
 
     return ctx;
   }
 
-  // ── LEGACY findSR kept for fallback ──
   findSR(closes, highs, lows) {
     const lb = Math.min(50, highs.length);
     const rh = highs.slice(-lb), rl = lows.slice(-lb);
@@ -305,7 +394,7 @@ export class SignalEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CONFLICT DETECTION v6 + UPGRADED S/R
+    // CONFLICT DETECTION
     // ═══════════════════════════════════════════════════════════
 
     if (ind.stoch) {
@@ -316,17 +405,12 @@ export class SignalEngine {
     if (ind.rsi < 30) conflicts.push({ blocks: 'SELL', reason: `RSI oversold (${ind.rsi.toFixed(0)})` });
     if (ind.rsi > 70) conflicts.push({ blocks: 'BUY', reason: `RSI overbought (${ind.rsi.toFixed(0)})` });
 
-    // MACD histogram conflict — only block if histogram is meaningful (>0.5 ATR% of price)
-    // Prevents blocking on tiny 0.001 histogram values
     if (ind.macd && !eventSources.has('macd')) {
-      const histThreshold = currentPrice * 0.0001; // 0.01% of price = meaningful
+      const histThreshold = currentPrice * 0.0001;
       if (ind.macd.histogram > histThreshold) conflicts.push({ blocks: 'SELL', reason: `MACD histogram positive (+${ind.macd.histogram.toFixed(3)})` });
       if (ind.macd.histogram < -histThreshold) conflicts.push({ blocks: 'BUY', reason: `MACD histogram negative (${ind.macd.histogram.toFixed(3)})` });
     }
 
-    // Neutral momentum block — tightened zones to reduce over-blocking
-    // Old: RSI 40-60 + Stoch 35-65 (too wide)
-    // New: RSI 43-57 + Stoch 40-60 (truly neutral only)
     const rsiNeutral = ind.rsi >= 43 && ind.rsi <= 57;
     const stochNeutral = ind.stoch && ind.stoch.k >= 40 && ind.stoch.k <= 60;
     if (rsiNeutral && stochNeutral) {
@@ -339,10 +423,6 @@ export class SignalEngine {
       if (pB > 0.95) conflicts.push({ blocks: 'BUY', reason: 'Price at extreme upper BB' });
     }
 
-    // ── S/R PROXIMITY: SOFT PENALTY instead of hard block ──
-    // Hard blocking was killing too many signals (814 blocks in 5000 candles)
-    // Now: close to strong level = confidence penalty, not full block
-    // Only HARD block if price is literally sitting on the level (< 0.2 ATR)
     const atrValue = ind.atr || currentPrice * 0.01;
     const sr = ctx.sr;
     let srPenalty = { buy: 0, sell: 0, buyReason: '', sellReason: '' };
@@ -351,10 +431,8 @@ export class SignalEngine {
       const distToR = sr.nearestResistance.price - currentPrice;
       if (distToR >= 0) {
         if (distToR < atrValue * 0.2 && sr.nearestResistance.strength >= 60) {
-          // Literally at resistance — hard block
           conflicts.push({ blocks: 'BUY', reason: `AT resistance ${sr.nearestResistance.price.toFixed(2)} (str:${sr.nearestResistance.strength.toFixed(0)})` });
         } else if (distToR < atrValue * 1.0 && sr.nearestResistance.strength >= 50) {
-          // Near resistance — soft penalty stored for later
           srPenalty.buy = 0.85;
           srPenalty.buyReason = `Near resistance ${sr.nearestResistance.price.toFixed(2)} (-15%)`;
         }
@@ -365,7 +443,6 @@ export class SignalEngine {
       const distToS = currentPrice - sr.nearestSupport.price;
       if (distToS >= 0) {
         if (distToS < atrValue * 0.2 && sr.nearestSupport.strength >= 60) {
-          // Literally at support — hard block
           conflicts.push({ blocks: 'SELL', reason: `AT support ${sr.nearestSupport.price.toFixed(2)} (str:${sr.nearestSupport.strength.toFixed(0)})` });
         } else if (distToS < atrValue * 1.0 && sr.nearestSupport.strength >= 50) {
           srPenalty.sell = 0.85;
@@ -374,8 +451,6 @@ export class SignalEngine {
       }
     }
 
-    // Ranging block — raised ADX threshold from 20 to 22
-    // ADX 20-22 is borderline trending, not reliable enough to trade
     const adxValue = ind.adx?.adx || 0;
     if (adxValue < 22) {
       const hasExtremeRSI = ind.rsi < 30 || ind.rsi > 70;
@@ -385,24 +460,19 @@ export class SignalEngine {
       }
     }
 
-    // NEW: Weak trend block — if trend exists but ADX < 25, require price to be
-    // clearly on the right side of EMA50 (not just barely above/below it)
     if (adxValue >= 22 && adxValue < 25) {
       const distFromEma50 = Math.abs(ind.price - ind.ema50);
       const atrPct = distFromEma50 / atrValue;
       if (atrPct < 0.5) {
-        // Price is within 0.5 ATR of EMA50 — too close to trend line, choppy area
         conflicts.push({ blocks: 'BOTH', reason: `Price too close to EMA50 in weak trend (ADX:${adxValue.toFixed(0)})` });
       }
     }
 
-    // v6 Momentum conflicts
     if (momentum.stochPersistence === 'OVERBOUGHT_PERSISTENT')
       conflicts.push({ blocks: 'SELL', reason: `Stoch overbought 4+ candles — momentum move` });
     if (momentum.stochPersistence === 'OVERSOLD_PERSISTENT')
       conflicts.push({ blocks: 'BUY', reason: `Stoch oversold 4+ candles — momentum move` });
 
-    // Price structure — raised to 4+ HH/HL to avoid over-blocking on normal retracements
     if (momentum.higherHighs >= 4 && momentum.higherLows >= 4) {
       conflicts.push({ blocks: 'SELL', reason: `Bullish structure (${momentum.higherHighs}HH/${momentum.higherLows}HL)` });
     }
@@ -469,25 +539,88 @@ export class SignalEngine {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // MACRO TREND FILTER (replaces broken entry candle filter)
-    //
-    // Root cause of all losses: 5min ADX doesn't see macro trend.
-    // Gold was in a massive bull run all February. SELL signals lost
-    // because they were fighting a $100 macro move.
-    //
-    // Fix 1: EMA100 macro trend bias
-    //   - Price above EMA100 = macro bullish → SELL gets heavy penalty
-    //   - Price below EMA100 = macro bearish → BUY gets heavy penalty
-    //   - Strong macro (price > 1 ATR from EMA100) = hard block counter-direction
-    //
-    // Fix 2: Volatility expansion requirement
-    //   - Only trade when ATR is expanding (market is moving)
-    //   - ATR contracting = consolidation = don't enter
+    // 1H MACRO TREND FILTER — data-proven fix
+    // XAU SELL = 0% WR, XAU BUY = 100% WR during 1h bull run
+    // EUR SELL = 87% WR, EUR BUY = 33% WR during 1h bear trend
+    // Hard block counter-macro on STRONG, heavy penalty on MODERATE
     // ═══════════════════════════════════════════════════════════
     if (action !== 'HOLD') {
+      const macro = this.getMacroTrend(symbol);
 
-      // ── NOTE: Macro filter removed — caused more harm than good on 9-signal sample
-      // Will tune after collecting 50+ live signals with real outcomes
+      if (action === 'SELL' && macro.trend === 'BULLISH') {
+        if (macro.strength === 'STRONG') {
+          return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+            [`BLOCKED: 1h macro strongly bullish — no SELL in bull trend (0% WR proven) — ${macro.reason}`]);
+        }
+        confidence = Math.round(confidence * 0.5);
+        warnings.push(`1h macro bullish counter-trend (-50%): ${macro.reason}`);
+      }
+
+      if (action === 'BUY' && macro.trend === 'BEARISH') {
+        if (macro.strength === 'STRONG') {
+          return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+            [`BLOCKED: 1h macro strongly bearish — no BUY in bear trend — ${macro.reason}`]);
+        }
+        confidence = Math.round(confidence * 0.5);
+        warnings.push(`1h macro bearish counter-trend (-50%): ${macro.reason}`);
+      }
+
+      if (action === 'BUY' && macro.trend === 'BULLISH') {
+        confidence = Math.min(Math.round(confidence * 1.12), 92);
+        reasons.push(`1h macro aligned bullish: ${macro.reason}`);
+      }
+      if (action === 'SELL' && macro.trend === 'BEARISH') {
+        confidence = Math.min(Math.round(confidence * 1.12), 92);
+        reasons.push(`1h macro aligned bearish: ${macro.reason}`);
+      }
+
+      if (process.env.DEBUG_MODE === 'true') {
+        console.log(`   🏔️  Macro (1h): ${macro.trend} (${macro.strength}) — ${macro.reason}`);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MTF FILTER (15min trend confirmation)
+    // STRONG (4/4): Hard block counter-trend signals
+    // MODERATE (3/4): Heavy -40% penalty counter-trend
+    // NEUTRAL (≤2/4): No restriction
+    // Aligned: +10% confidence boost
+    // ═══════════════════════════════════════════════════════════
+    if (action !== 'HOLD') {
+      const mtf = this.getMTFTrend(symbol);
+
+      if (action === 'BUY' && mtf.trend === 'BEARISH') {
+        if (mtf.strength === 'STRONG') {
+          return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+            [`BLOCKED: 15min MTF strongly bearish — ${mtf.reason}`]);
+        }
+        // Moderate: heavy penalty but allow (could be 15min retracement)
+        confidence = Math.round(confidence * 0.6);
+        warnings.push(`15min MTF bearish (-40%): ${mtf.reason}`);
+      }
+
+      if (action === 'SELL' && mtf.trend === 'BULLISH') {
+        if (mtf.strength === 'STRONG') {
+          return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
+            [`BLOCKED: 15min MTF strongly bullish — ${mtf.reason}`]);
+        }
+        confidence = Math.round(confidence * 0.6);
+        warnings.push(`15min MTF bullish (-40%): ${mtf.reason}`);
+      }
+
+      // Alignment boost — trading WITH the higher timeframe
+      if (action === 'BUY' && mtf.trend === 'BULLISH') {
+        confidence = Math.min(Math.round(confidence * 1.1), 92);
+        reasons.push(`15min MTF aligned bullish: ${mtf.reason}`);
+      }
+      if (action === 'SELL' && mtf.trend === 'BEARISH') {
+        confidence = Math.min(Math.round(confidence * 1.1), 92);
+        reasons.push(`15min MTF aligned bearish: ${mtf.reason}`);
+      }
+
+      if (process.env.DEBUG_MODE === 'true') {
+        console.log(`   📈 MTF (15min): ${mtf.trend} (${mtf.strength}) — ${mtf.reason}`);
+      }
     }
 
     // ── CONTEXT ADJUSTMENTS ──
@@ -509,7 +642,6 @@ export class SignalEngine {
         reasons.push(`With bearish trend (ADX:${ctx.trendStrength.toFixed(0)})`);
       }
 
-      // v6: Structure boost
       if (action === 'BUY' && momentum.priceStructure === 'BULLISH_STRUCTURE') {
         confidence = Math.min(Math.round(confidence * 1.1), 90);
         reasons.push('Bullish price structure');
@@ -519,7 +651,6 @@ export class SignalEngine {
         reasons.push('Bearish price structure');
       }
 
-      // NEW: S/R proximity soft penalty
       if (action === 'BUY' && srPenalty.buy > 0) {
         confidence = Math.round(confidence * srPenalty.buy);
         warnings.push(srPenalty.buyReason);
@@ -529,7 +660,6 @@ export class SignalEngine {
         warnings.push(srPenalty.sellReason);
       }
 
-      // NEW: S/R strength boost — signal with strong level behind it
       if (action === 'BUY' && sr.nearestSupport && sr.nearestSupport.strength >= 50) {
         const distToS = currentPrice - sr.nearestSupport.price;
         if (distToS < atrValue * 3) {
@@ -545,7 +675,6 @@ export class SignalEngine {
         }
       }
 
-      // Session adjustments
       if (ctx.session === 'OVERLAP') { confidence = Math.min(Math.round(confidence * 1.1), 90); reasons.push('London/NY overlap'); }
       else if (ctx.session === 'LONDON' || ctx.session === 'NEW_YORK') confidence = Math.min(Math.round(confidence * 1.05), 90);
       else if (ctx.session === 'ASIAN') { confidence = Math.round(confidence * 0.85); warnings.push('Asian session (-15%)'); }
@@ -559,20 +688,17 @@ export class SignalEngine {
         return this.holdResult(symbol, currentPrice, ind, ctx, momentum, ['Confidence too low after adjustments']);
     }
 
-    // ── ADX=0 GUARD (calculation error check) ──
-    // ADX returning 0 means indicator calculation failed — skip signal
+    // ── ADX=0 GUARD ──
     if (action !== 'HOLD') {
       const adxCheck = ind.adx?.adx || 0;
-      if (adxCheck === 0 && action !== 'HOLD') {
+      if (adxCheck === 0) {
         return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
           ['ADX calculation error (returned 0) — skipping signal']);
       }
     }
 
     // ── ATR MINIMUM GUARD ──
-    // XAU/USD: if ATR < $2, volatility is too low to produce clean moves
-    // Signals 4,5,6 had ATR of $0.24 — essentially untradeable noise level
-    if (symbol.includes('XAU') && atrValue < 2.0) {
+    if (symbol.includes('XAU') && atrValue < 1.0) {
       return this.holdResult(symbol, currentPrice, ind, ctx, momentum,
         [`ATR too low (${atrValue.toFixed(2)}) — ultra-squeeze, not tradeable`]);
     }
@@ -582,11 +708,7 @@ export class SignalEngine {
     }
 
     // ── SL/TP CALCULATION ──
-    // Pure ATR-based SL — no S/R tightening (caused artificially high R:R)
-    // R:R capped between minRR (1.5) and 2.5 for realistic 5min scalping
     if (action !== 'HOLD') {
-      // SL: 2.5x ATR standard, 3x ATR high volatility
-      // XAU/USD 5min moves easily 2x ATR on spikes — need wider SL
       const slMul = ctx.volatility === 'HIGH' ? 3.0 : 2.5;
       const maxRR = 2.5;
       let stopLoss = 0, takeProfit = 0, riskReward = 0;
@@ -594,8 +716,7 @@ export class SignalEngine {
       if (action === 'BUY') {
         stopLoss = currentPrice - (atrValue * slMul);
         const risk = currentPrice - stopLoss;
-        const fullTP = currentPrice + (risk * maxRR); // Always achieves maxRR
-        // Only use resistance as TP if it's between minRR and maxRR (valid window)
+        const fullTP = currentPrice + (risk * maxRR);
         const minTPRequired = currentPrice + (risk * this.minRR);
         const resistanceTP = (sr.resistance > minTPRequired && sr.resistance < fullTP)
           ? sr.resistance : fullTP;
@@ -617,7 +738,6 @@ export class SignalEngine {
       if (riskReward < this.minRR)
         return this.holdResult(symbol, currentPrice, ind, ctx, momentum, [`R:R too low (${riskReward} < ${this.minRR})`]);
 
-      // Format S/R levels for Discord
       const srFormatted = this.srDetector.formatLevels(sr);
 
       return {
@@ -627,7 +747,6 @@ export class SignalEngine {
           trend: ctx.trend, trendStrength: ctx.trendStrength, regime: ctx.regime,
           session: ctx.session, volatility: ctx.volatility,
           support: ctx.sr.support, resistance: ctx.sr.resistance,
-          // v2: Enhanced S/R info
           supportLevels: srFormatted.supports,
           resistanceLevels: srFormatted.resistances
         },

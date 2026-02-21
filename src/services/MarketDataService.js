@@ -8,30 +8,31 @@ export class MarketDataService extends EventEmitter {
     this.timeframe = this.normalizeTimeframe(timeframe);
     this.apiKey = process.env.TWELVE_DATA_API_KEY;
     this.candleBuffers = new Map();
+
+    // ── NEW: 15min secondary timeframe buffer ──
+    this.candleBuffers15m = new Map();
+    this.lastCandle15mTimestamps = new Map();
+
     this.pollInterval = null;
-    
+    this.poll15mInterval = null; // Separate poll for 15min
+
     // ── RATE LIMIT MANAGEMENT ──
-    // TwelveData free: 800 credits/day, 8 credits/minute
     this.apiCreditsUsed = 0;
     this.apiCreditsDaily = 0;
-    this.dailyLimit = parseInt(process.env.API_DAILY_LIMIT) || 750; // Leave buffer
-    this.minuteLimit = 7; // Leave 1 buffer
+    this.dailyLimit = parseInt(process.env.API_DAILY_LIMIT) || 750;
+    this.minuteLimit = 7;
     this.minuteCallCount = 0;
     this.lastMinuteReset = Date.now();
-    
-    // Track last candle timestamps to avoid unnecessary API calls
+
     this.lastCandleTimestamps = new Map();
-    
-    // Retry config
+
     this.maxRetries = 3;
     this.retryDelay = 5000;
-    
-    // Connection monitoring
+
     this.consecutiveErrors = 0;
     this.maxConsecutiveErrors = 10;
     this.isHealthy = true;
-    
-    // Reset daily counter at midnight UTC
+
     this.scheduleDailyReset();
   }
 
@@ -47,6 +48,24 @@ export class MarketDataService extends EventEmitter {
     console.log(`⏱️ Timeframe: ${tf} → ${normalized}`);
     return normalized;
   }
+  async fetchHistorical1h(symbol) {
+    try {
+      const response = await this.client.get('/time_series', {
+        params: { symbol, interval: '1h', outputsize: 200, apikey: this.apiKey }
+      });
+      if (response.data.status === 'error') return [];
+      return (response.data.values || []).reverse().map(v => ({
+        symbol,
+        timestamp: new Date(v.datetime).getTime(),
+        open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close),
+        volume: parseFloat(v.volume || 0)
+      }));
+    } catch (err) {
+      console.error('1h fetch error:', err.message);
+      return [];
+    }
+  }
 
   async start() {
     console.log(`📡 Connecting to market data for: ${this.symbols.join(', ')}`);
@@ -57,38 +76,38 @@ export class MarketDataService extends EventEmitter {
 
   async startPolling() {
     const intervalMs = this.getSmartInterval();
-    console.log(`⏱ Smart polling every ${intervalMs / 1000} seconds`);
-    console.log(`   (Optimized for ${this.symbols.length} symbols on ${this.timeframe} timeframe)`);
-    console.log(`   Estimated daily API calls: ~${this.estimateDailyCalls(intervalMs)}\n`);
+    console.log(`⏱ Smart polling every ${intervalMs / 1000} seconds (5min)`);
+    console.log(`⏱ 15min polling every 910 seconds`);
+    console.log(`   Estimated daily API calls: ~${this.estimateDailyCalls(intervalMs)} (5min) + ~${this.estimateDailyCalls(910000)} (15min)\n`);
 
     // First fetch
     console.log('🔍 Fetching first real-time data...\n');
     await this.fetchLatestCandles();
+    await this.fetchLatest15mCandles();
 
     this.pollInterval = setInterval(() => {
       this.fetchLatestCandles();
     }, intervalMs);
+
+    // Poll 15min candles every ~15min (910s)
+    this.poll15mInterval = setInterval(() => {
+      this.fetchLatest15mCandles();
+    }, 910000);
   }
 
-  // ── SMART INTERVAL: Calculate optimal polling based on timeframe and symbols ──
   getSmartInterval() {
     const baseInterval = this.getIntervalMs();
     const symbolCount = this.symbols.length;
-    
-    // Calculate calls per day at this interval
     const callsPerPoll = symbolCount;
     const pollsPerDay = (24 * 60 * 60 * 1000) / baseInterval;
     const estimatedDaily = pollsPerDay * callsPerPoll;
-    
-    // If we'd exceed daily limit, increase interval
+
     if (estimatedDaily > this.dailyLimit * 0.9) {
       const safeInterval = Math.ceil((24 * 60 * 60 * 1000 * callsPerPoll) / (this.dailyLimit * 0.8));
       console.log(`⚠️ Adjusted polling interval to stay within API limits`);
       return Math.max(safeInterval, baseInterval);
     }
-    
-    // For short timeframes, don't poll faster than the candle closes
-    // No point polling every 60s for 5min candles - new candle only every 5 min
+
     return baseInterval;
   }
 
@@ -97,24 +116,20 @@ export class MarketDataService extends EventEmitter {
     return Math.round(pollsPerDay * this.symbols.length);
   }
 
-  // ── RATE LIMIT CHECK ──
   async checkRateLimit() {
-    // Reset minute counter
     if (Date.now() - this.lastMinuteReset > 60000) {
       this.minuteCallCount = 0;
       this.lastMinuteReset = Date.now();
     }
 
-    // Check minute limit
     if (this.minuteCallCount >= this.minuteLimit) {
       const waitTime = 60000 - (Date.now() - this.lastMinuteReset) + 1000;
-      console.log(`⏳ Rate limit: waiting ${(waitTime/1000).toFixed(0)}s for minute reset...`);
+      console.log(`⏳ Rate limit: waiting ${(waitTime / 1000).toFixed(0)}s for minute reset...`);
       await this.sleep(waitTime);
       this.minuteCallCount = 0;
       this.lastMinuteReset = Date.now();
     }
 
-    // Check daily limit
     if (this.apiCreditsDaily >= this.dailyLimit) {
       console.log(`🛑 Daily API limit reached (${this.apiCreditsDaily}/${this.dailyLimit}). Pausing until midnight UTC...`);
       this.emit('dailyLimitReached');
@@ -124,45 +139,37 @@ export class MarketDataService extends EventEmitter {
     return true;
   }
 
-  // ── API CALL WITH RETRY AND RATE LIMITING ──
   async apiCall(params, retries = 0) {
     if (!(await this.checkRateLimit())) return null;
 
     try {
       this.minuteCallCount++;
       this.apiCreditsDaily++;
-      
+
       const response = await axios.get('https://api.twelvedata.com/time_series', {
         params: { ...params, apikey: this.apiKey },
         timeout: 15000
       });
 
-      // Check for API errors
       if (response.data.status === 'error') {
         const msg = response.data.message || '';
-        
-        // Rate limit error
         if (msg.includes('limit') || msg.includes('exceeded') || msg.includes('429')) {
           console.warn(`⚠️ API rate limit hit. Waiting 60s...`);
           await this.sleep(60000);
           this.minuteCallCount = 0;
-          if (retries < this.maxRetries) {
-            return this.apiCall(params, retries + 1);
-          }
+          if (retries < this.maxRetries) return this.apiCall(params, retries + 1);
         }
-        
         console.error(`❌ API Error: ${msg}`);
         return null;
       }
 
-      // Success - reset error counter
       this.consecutiveErrors = 0;
       this.isHealthy = true;
       return response.data;
 
     } catch (err) {
       this.consecutiveErrors++;
-      
+
       if (err.response?.status === 429) {
         console.warn(`⚠️ HTTP 429 Rate limited. Waiting 60s...`);
         await this.sleep(60000);
@@ -177,7 +184,6 @@ export class MarketDataService extends EventEmitter {
         console.error(`❌ API Error: ${err.message}`);
       }
 
-      // Health check
       if (this.consecutiveErrors >= this.maxConsecutiveErrors) {
         this.isHealthy = false;
         console.error(`🚨 ${this.consecutiveErrors} consecutive errors! Service may be down.`);
@@ -189,19 +195,67 @@ export class MarketDataService extends EventEmitter {
   }
 
   async fetchHistoricalData() {
-    console.log('\n📥 Fetching historical data...');
-    
+    console.log('\n📥 Fetching historical data (5min + 15min)...');
+
     for (const symbol of this.symbols) {
-      console.log(`   Fetching ${symbol}...`);
-      
+      // ── 5min historical ──
+      console.log(`   Fetching ${symbol} (5min)...`);
       const data = await this.apiCall({
         symbol,
         interval: this.timeframe,
-        outputsize: 150 // More data for better indicator warmup
+        outputsize: 150
       });
 
       if (data?.values) {
-        const candles = data.values.reverse().map(v => ({
+        const candles = this._parseCandles(symbol, data.values);
+        this.candleBuffers.set(symbol, candles);
+        this.lastCandleTimestamps.set(symbol, candles[candles.length - 1].timestamp);
+        console.log(`   ✅ 5min: ${candles.length} candles for ${symbol} (Price: ${candles[candles.length - 1].close})`);
+      } else {
+        console.error(`   ❌ No 5min data for ${symbol}`);
+      }
+
+      await this.sleep(1500);
+
+      // ── 15min historical ──
+      console.log(`   Fetching ${symbol} (15min)...`);
+      const data15m = await this.apiCall({
+        symbol,
+        interval: '15min',
+        outputsize: 150  // 150 × 15min = ~37.5 hours of history
+      });
+
+      if (data15m?.values) {
+        const candles15m = this._parseCandles(symbol, data15m.values);
+        this.candleBuffers15m.set(symbol, candles15m);
+        this.lastCandle15mTimestamps.set(symbol, candles15m[candles15m.length - 1].timestamp);
+        console.log(`   ✅ 15min: ${candles15m.length} candles for ${symbol}`);
+        this.emit('candles15mLoaded', symbol, candles15m);
+      } else {
+        console.error(`   ❌ No 15min data for ${symbol}`);
+      }
+
+      await this.sleep(1500);
+    }
+
+    console.log(`📥 Historical data complete (API credits used: ${this.apiCreditsDaily})\n`);
+  }
+
+  // ── NEW: Fetch latest 15min candles ──
+  async fetchLatest15mCandles() {
+    if (!this.isHealthy) return;
+
+    for (const symbol of this.symbols) {
+      const data = await this.apiCall({
+        symbol,
+        interval: '15min',
+        outputsize: 3
+      });
+
+      if (!data?.values) continue;
+
+      for (const v of data.values.reverse()) {
+        const candle = {
           symbol,
           timestamp: new Date(v.datetime).getTime(),
           open: parseFloat(v.open),
@@ -209,19 +263,26 @@ export class MarketDataService extends EventEmitter {
           low: parseFloat(v.low),
           close: parseFloat(v.close),
           volume: parseFloat(v.volume || 0)
-        }));
+        };
 
-        this.candleBuffers.set(symbol, candles);
-        this.lastCandleTimestamps.set(symbol, candles[candles.length - 1].timestamp);
-        console.log(`   ✅ Loaded ${candles.length} candles for ${symbol} (Price: ${candles[candles.length - 1].close})`);
-      } else {
-        console.error(`   ❌ No data for ${symbol}`);
+        const buffer = this.candleBuffers15m.get(symbol) || [];
+        const lastCandle = buffer[buffer.length - 1];
+
+        if (!lastCandle || candle.timestamp > lastCandle.timestamp) {
+          buffer.push(candle);
+          if (buffer.length > 300) buffer.shift();
+          this.candleBuffers15m.set(symbol, buffer);
+          this.lastCandle15mTimestamps.set(symbol, candle.timestamp);
+          this.emit('candle15m', candle);
+        } else if (candle.timestamp === lastCandle.timestamp) {
+          buffer[buffer.length - 1] = candle;
+          this.candleBuffers15m.set(symbol, buffer);
+          this.emit('candle15m', candle);
+        }
       }
 
-      await this.sleep(2000); // Generous spacing between initial fetches
+      await this.sleep(800);
     }
-    
-    console.log(`📥 Historical data complete (API credits used: ${this.apiCreditsDaily})\n`);
   }
 
   async fetchLatestCandles() {
@@ -235,12 +296,11 @@ export class MarketDataService extends EventEmitter {
       const data = await this.apiCall({
         symbol,
         interval: this.timeframe,
-        outputsize: 3 // Get last 3 candles for safety
+        outputsize: 3
       });
 
       if (!data?.values) continue;
 
-      // Process latest candles
       for (const v of data.values.reverse()) {
         const candle = {
           symbol,
@@ -256,16 +316,13 @@ export class MarketDataService extends EventEmitter {
         const lastCandle = buffer[buffer.length - 1];
 
         if (!lastCandle || candle.timestamp > lastCandle.timestamp) {
-          // New candle
           buffer.push(candle);
           if (buffer.length > 300) buffer.shift();
           this.candleBuffers.set(symbol, buffer);
           this.lastCandleTimestamps.set(symbol, candle.timestamp);
-          
           console.log(`📊 New candle: ${symbol} @ ${candle.close} (${new Date(candle.timestamp).toISOString()})`);
           this.emit('candle', candle);
         } else if (candle.timestamp === lastCandle.timestamp) {
-          // Update current candle
           buffer[buffer.length - 1] = candle;
           if (process.env.DEBUG_MODE === 'true') {
             console.log(`🔄 Updated: ${symbol} @ ${candle.close}`);
@@ -274,30 +331,46 @@ export class MarketDataService extends EventEmitter {
         }
       }
 
-      await this.sleep(800); // Rate limit between symbols
+      await this.sleep(800);
     }
 
-    // Log API usage periodically
     if (this.apiCreditsDaily % 50 === 0 && this.apiCreditsDaily > 0) {
       console.log(`📊 API Credits: ${this.apiCreditsDaily}/${this.dailyLimit} used today`);
     }
+  }
+
+  _parseCandles(symbol, values) {
+    return values.reverse().map(v => ({
+      symbol,
+      timestamp: new Date(v.datetime).getTime(),
+      open: parseFloat(v.open),
+      high: parseFloat(v.high),
+      low: parseFloat(v.low),
+      close: parseFloat(v.close),
+      volume: parseFloat(v.volume || 0)
+    }));
   }
 
   getCandles(symbol) {
     return this.candleBuffers.get(symbol) || [];
   }
 
+  // ── NEW: Get 15min candles ──
+  getCandles15m(symbol) {
+    return this.candleBuffers15m.get(symbol) || [];
+  }
+
   getIntervalMs() {
     const map = {
-      '1min': 65000,     // Slightly over 1 min to ensure new candle
-      '5min': 305000,    // Slightly over 5 min
+      '1min': 65000,
+      '5min': 305000,
       '15min': 910000,
       '30min': 1810000,
       '45min': 2710000,
       '1h': 3610000,
       '2h': 7210000,
       '4h': 14410000,
-      '1day': 3600000,   // Check hourly for daily candles
+      '1day': 3600000,
     };
     return map[this.timeframe] || 305000;
   }
@@ -306,16 +379,16 @@ export class MarketDataService extends EventEmitter {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 1, 0, 0); // Reset at 00:01 UTC
-    
+    tomorrow.setUTCHours(0, 1, 0, 0);
+
     const msUntilReset = tomorrow.getTime() - now.getTime();
-    
+
     setTimeout(() => {
       this.apiCreditsDaily = 0;
       console.log('🔄 Daily API credit counter reset');
-      this.scheduleDailyReset(); // Schedule next reset
+      this.scheduleDailyReset();
     }, msUntilReset);
-    
+
     console.log(`⏰ Daily credit reset scheduled in ${(msUntilReset / 3600000).toFixed(1)} hours`);
   }
 
@@ -328,6 +401,9 @@ export class MarketDataService extends EventEmitter {
       symbolsTracking: this.symbols.length,
       candleBufferSizes: Object.fromEntries(
         this.symbols.map(s => [s, (this.candleBuffers.get(s) || []).length])
+      ),
+      candleBuffer15mSizes: Object.fromEntries(
+        this.symbols.map(s => [s, (this.candleBuffers15m.get(s) || []).length])
       )
     };
   }
@@ -338,5 +414,6 @@ export class MarketDataService extends EventEmitter {
 
   stop() {
     if (this.pollInterval) clearInterval(this.pollInterval);
+    if (this.poll15mInterval) clearInterval(this.poll15mInterval);
   }
 }

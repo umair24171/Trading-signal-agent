@@ -1,1653 +1,6 @@
 [
   {
     "symbol": "XAU/USD",
-    "timestamp": 1770153000000,
-    "open": 4925.66199,
-    "high": 4947.50094,
-    "low": 4925.66199,
-    "close": 4940.22596,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770153300000,
-    "open": 4940.69653,
-    "high": 4940.69653,
-    "low": 4934.87538,
-    "close": 4936.04002,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770153600000,
-    "open": 4936.72274,
-    "high": 4936.72274,
-    "low": 4918.01249,
-    "close": 4919.7871,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770153900000,
-    "open": 4920.53863,
-    "high": 4925.45548,
-    "low": 4909.9501,
-    "close": 4924.76888,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770154200000,
-    "open": 4925.13916,
-    "high": 4925.13916,
-    "low": 4917.07143,
-    "close": 4920.15639,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770154500000,
-    "open": 4920.44956,
-    "high": 4920.44956,
-    "low": 4914.9308,
-    "close": 4916.63856,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770154800000,
-    "open": 4916.77438,
-    "high": 4921.19952,
-    "low": 4916.61587,
-    "close": 4920.83827,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770155100000,
-    "open": 4920.79955,
-    "high": 4925.30629,
-    "low": 4920.79955,
-    "close": 4924.4964,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770155400000,
-    "open": 4924.52609,
-    "high": 4931.25352,
-    "low": 4924.4882,
-    "close": 4930.13167,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770155700000,
-    "open": 4929.75928,
-    "high": 4935.00874,
-    "low": 4928.51715,
-    "close": 4932.85977,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770156000000,
-    "open": 4932.79574,
-    "high": 4947.35835,
-    "low": 4932.79574,
-    "close": 4939.82729,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770156300000,
-    "open": 4939.69878,
-    "high": 4940.08547,
-    "low": 4932.83922,
-    "close": 4934.45224,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770156600000,
-    "open": 4934.16474,
-    "high": 4944.88039,
-    "low": 4934.16474,
-    "close": 4944.42838,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770156900000,
-    "open": 4944.52317,
-    "high": 4967.06528,
-    "low": 4942.14745,
-    "close": 4962.44962,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770157200000,
-    "open": 4963.44679,
-    "high": 4972.86151,
-    "low": 4962.04992,
-    "close": 4970.28229,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770157500000,
-    "open": 4970.25062,
-    "high": 4980.97586,
-    "low": 4970.25062,
-    "close": 4974.01951,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770157800000,
-    "open": 4973.42824,
-    "high": 4977.69903,
-    "low": 4967.25939,
-    "close": 4974.82267,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770158100000,
-    "open": 4974.07852,
-    "high": 4992.48417,
-    "low": 4974.07852,
-    "close": 4992.48417,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770158400000,
-    "open": 4993.13125,
-    "high": 4993.13125,
-    "low": 4979.26346,
-    "close": 4983.43472,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770158700000,
-    "open": 4983.30429,
-    "high": 4983.45776,
-    "low": 4973.98643,
-    "close": 4976.71684,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770159000000,
-    "open": 4977.21742,
-    "high": 4977.21742,
-    "low": 4955.81324,
-    "close": 4955.81324,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770159300000,
-    "open": 4955.66134,
-    "high": 4960.51782,
-    "low": 4955.66134,
-    "close": 4957.14645,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770159600000,
-    "open": 4956.82321,
-    "high": 4958.53535,
-    "low": 4953.47768,
-    "close": 4958.46855,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770159900000,
-    "open": 4958.48233,
-    "high": 4958.5075,
-    "low": 4941.24924,
-    "close": 4941.24924,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770160200000,
-    "open": 4941.23053,
-    "high": 4951.77446,
-    "low": 4930.82814,
-    "close": 4941.21906,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770160500000,
-    "open": 4941.10845,
-    "high": 4968.42597,
-    "low": 4941.10845,
-    "close": 4964.53527,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770160800000,
-    "open": 4964.62768,
-    "high": 4966.69162,
-    "low": 4952.28651,
-    "close": 4956.08185,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770161100000,
-    "open": 4955.95644,
-    "high": 4957.60153,
-    "low": 4944.55618,
-    "close": 4947.53485,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770161400000,
-    "open": 4947.68421,
-    "high": 4962.98107,
-    "low": 4947.54351,
-    "close": 4961.91764,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770161700000,
-    "open": 4960.65927,
-    "high": 4961.89382,
-    "low": 4950.76642,
-    "close": 4950.78679,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770162000000,
-    "open": 4951.46022,
-    "high": 4951.46022,
-    "low": 4917.21911,
-    "close": 4921.93194,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770162300000,
-    "open": 4921.383,
-    "high": 4940.38583,
-    "low": 4912.86134,
-    "close": 4930.94024,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770162600000,
-    "open": 4929.88994,
-    "high": 4946.29797,
-    "low": 4929.88994,
-    "close": 4940.48757,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770162900000,
-    "open": 4940.82724,
-    "high": 4940.82724,
-    "low": 4930.66773,
-    "close": 4935.79117,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770163200000,
-    "open": 4934.6366,
-    "high": 4937.67213,
-    "low": 4928.52344,
-    "close": 4935.24417,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770163500000,
-    "open": 4935.41878,
-    "high": 4946.64527,
-    "low": 4933.53448,
-    "close": 4941.65577,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770163800000,
-    "open": 4941.2967,
-    "high": 4949.69755,
-    "low": 4941.2967,
-    "close": 4943.87991,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770164100000,
-    "open": 4943.6972,
-    "high": 4947.03026,
-    "low": 4937.74503,
-    "close": 4938.61047,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770164400000,
-    "open": 4938.55785,
-    "high": 4942.96592,
-    "low": 4927.6085,
-    "close": 4927.6085,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770164700000,
-    "open": 4928.46186,
-    "high": 4929.47927,
-    "low": 4903.15483,
-    "close": 4913.96864,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770165000000,
-    "open": 4914.47271,
-    "high": 4914.47271,
-    "low": 4879.90269,
-    "close": 4891.26313,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770165300000,
-    "open": 4892.39464,
-    "high": 4903.83479,
-    "low": 4890.59003,
-    "close": 4901.06752,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770165600000,
-    "open": 4901.58851,
-    "high": 4914.24654,
-    "low": 4901.04463,
-    "close": 4906.24157,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770165900000,
-    "open": 4906.29763,
-    "high": 4913.55985,
-    "low": 4899.4732,
-    "close": 4902.95954,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770166200000,
-    "open": 4902.72359,
-    "high": 4908.92202,
-    "low": 4894.74018,
-    "close": 4908.92202,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770166500000,
-    "open": 4909.0976,
-    "high": 4911.39532,
-    "low": 4906.31388,
-    "close": 4909.0507,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770166800000,
-    "open": 4908.15963,
-    "high": 4909.01558,
-    "low": 4884.40988,
-    "close": 4889.07607,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770167100000,
-    "open": 4888.78965,
-    "high": 4892.63535,
-    "low": 4879.40351,
-    "close": 4884.45498,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770167400000,
-    "open": 4884.40189,
-    "high": 4915.34757,
-    "low": 4882.03053,
-    "close": 4915.34757,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770167700000,
-    "open": 4915.49461,
-    "high": 4927.94223,
-    "low": 4915.32885,
-    "close": 4927.80679,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770168000000,
-    "open": 4927.46811,
-    "high": 4928.2766,
-    "low": 4923.98318,
-    "close": 4926.27096,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770168300000,
-    "open": 4926.37075,
-    "high": 4934.34129,
-    "low": 4915.74739,
-    "close": 4930.23786,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770168600000,
-    "open": 4930.04626,
-    "high": 4930.25088,
-    "low": 4925.34037,
-    "close": 4928.1948,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770168900000,
-    "open": 4927.72379,
-    "high": 4942.61315,
-    "low": 4927.72379,
-    "close": 4940.20553,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770169200000,
-    "open": 4940.16384,
-    "high": 4944.96009,
-    "low": 4940.16384,
-    "close": 4942.74181,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770169500000,
-    "open": 4941.78801,
-    "high": 4942.70619,
-    "low": 4932.38047,
-    "close": 4936.79175,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770169800000,
-    "open": 4936.94345,
-    "high": 4936.94345,
-    "low": 4921.73147,
-    "close": 4922.06589,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770170100000,
-    "open": 4922.19228,
-    "high": 4926.62097,
-    "low": 4922.0291,
-    "close": 4926.47711,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770170400000,
-    "open": 4926.18518,
-    "high": 4926.48643,
-    "low": 4910.12918,
-    "close": 4910.12918,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770170700000,
-    "open": 4910.10279,
-    "high": 4916.65048,
-    "low": 4906.67906,
-    "close": 4916.65048,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770171000000,
-    "open": 4916.20357,
-    "high": 4921.75055,
-    "low": 4907.86,
-    "close": 4918.76696,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770171300000,
-    "open": 4918.41248,
-    "high": 4931.21086,
-    "low": 4916.86854,
-    "close": 4931.21086,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770171600000,
-    "open": 4930.89952,
-    "high": 4933.72904,
-    "low": 4927.53055,
-    "close": 4933.72904,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770171900000,
-    "open": 4933.70077,
-    "high": 4942.64502,
-    "low": 4929.0204,
-    "close": 4936.185,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770172200000,
-    "open": 4936.99294,
-    "high": 4948.46643,
-    "low": 4935.81124,
-    "close": 4948.00868,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770172500000,
-    "open": 4949.16773,
-    "high": 4960.90416,
-    "low": 4947.3749,
-    "close": 4951.22789,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770172800000,
-    "open": 4950.8721,
-    "high": 4953.64228,
-    "low": 4949.39109,
-    "close": 4950.15402,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770173100000,
-    "open": 4949.27672,
-    "high": 4954.76804,
-    "low": 4944.14171,
-    "close": 4944.14171,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770173400000,
-    "open": 4943.90276,
-    "high": 4944.16726,
-    "low": 4935.29927,
-    "close": 4938.69958,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770173700000,
-    "open": 4938.68717,
-    "high": 4944.94276,
-    "low": 4937.05918,
-    "close": 4943.24389,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770174000000,
-    "open": 4943.18325,
-    "high": 4951.3549,
-    "low": 4940.38129,
-    "close": 4951.3549,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770174300000,
-    "open": 4951.14557,
-    "high": 4952.54414,
-    "low": 4947.89944,
-    "close": 4949.1448,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770174600000,
-    "open": 4948.95788,
-    "high": 4961.81055,
-    "low": 4948.95788,
-    "close": 4957.3772,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770174900000,
-    "open": 4957.26119,
-    "high": 4957.48548,
-    "low": 4947.96831,
-    "close": 4947.96831,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770175200000,
-    "open": 4948.09328,
-    "high": 4953.00009,
-    "low": 4944.30507,
-    "close": 4951.5528,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770175500000,
-    "open": 4951.6707,
-    "high": 4955.84664,
-    "low": 4950.01842,
-    "close": 4951.63132,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770175800000,
-    "open": 4951.76339,
-    "high": 4956.93539,
-    "low": 4951.63855,
-    "close": 4953.19194,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770176100000,
-    "open": 4953.22678,
-    "high": 4953.58865,
-    "low": 4947.00419,
-    "close": 4949.24372,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770176400000,
-    "open": 4950.7116,
-    "high": 4950.7116,
-    "low": 4932.24828,
-    "close": 4940.10274,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770176700000,
-    "open": 4939.81024,
-    "high": 4940.06705,
-    "low": 4936.13389,
-    "close": 4938.82018,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770177000000,
-    "open": 4938.83322,
-    "high": 4943.57395,
-    "low": 4935.12061,
-    "close": 4943.57395,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770177300000,
-    "open": 4943.39586,
-    "high": 4946.9532,
-    "low": 4942.86772,
-    "close": 4946.3904,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770177600000,
-    "open": 4946.24033,
-    "high": 4947.23802,
-    "low": 4946.24033,
-    "close": 4946.94875,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770177900000,
-    "open": 4946.94701,
-    "high": 4947.15185,
-    "low": 4946.91907,
-    "close": 4946.92338,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770178200000,
-    "open": 4946.98378,
-    "high": 4947.33214,
-    "low": 4946.88927,
-    "close": 4947.03436,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770178500000,
-    "open": 4946.96101,
-    "high": 4947.12596,
-    "low": 4946.90932,
-    "close": 4947.05447,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770178800000,
-    "open": 4946.95186,
-    "high": 4947.18195,
-    "low": 4946.89748,
-    "close": 4947.03151,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770179100000,
-    "open": 4947.03536,
-    "high": 4947.21563,
-    "low": 4946.75603,
-    "close": 4946.86074,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770179400000,
-    "open": 4946.84827,
-    "high": 4947.23042,
-    "low": 4946.63012,
-    "close": 4946.97844,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770179700000,
-    "open": 4946.89004,
-    "high": 4947.11174,
-    "low": 4946.89004,
-    "close": 4947.09897,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770180000000,
-    "open": 4947.00276,
-    "high": 4947.21028,
-    "low": 4946.24179,
-    "close": 4946.40939,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770180300000,
-    "open": 4946.35114,
-    "high": 4946.98229,
-    "low": 4945.68318,
-    "close": 4946.98229,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770180600000,
-    "open": 4946.94208,
-    "high": 4947.2064,
-    "low": 4946.90542,
-    "close": 4946.94963,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770180900000,
-    "open": 4946.86816,
-    "high": 4946.99898,
-    "low": 4945.8199,
-    "close": 4945.86256,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770181200000,
-    "open": 4946.60523,
-    "high": 4972.2359,
-    "low": 4945.56194,
-    "close": 4956.58484,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770181500000,
-    "open": 4956.33686,
-    "high": 4956.59325,
-    "low": 4911.51237,
-    "close": 4921.68329,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770181800000,
-    "open": 4922.48483,
-    "high": 4933.96903,
-    "low": 4921.67821,
-    "close": 4930.74282,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770182100000,
-    "open": 4929.10894,
-    "high": 4940.07363,
-    "low": 4929.10894,
-    "close": 4938.77165,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770182400000,
-    "open": 4938.49943,
-    "high": 4938.79383,
-    "low": 4929.40567,
-    "close": 4932.62866,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770182700000,
-    "open": 4931.92249,
-    "high": 4937.10596,
-    "low": 4925.28601,
-    "close": 4925.28601,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770183000000,
-    "open": 4924.01519,
-    "high": 4940.13684,
-    "low": 4924.01519,
-    "close": 4929.00032,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770183300000,
-    "open": 4928.50306,
-    "high": 4939.26209,
-    "low": 4928.50306,
-    "close": 4939.26209,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770183600000,
-    "open": 4939.07337,
-    "high": 4948.90277,
-    "low": 4939.07337,
-    "close": 4948.21305,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770183900000,
-    "open": 4948.11516,
-    "high": 4952.93712,
-    "low": 4944.16102,
-    "close": 4946.15692,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770184200000,
-    "open": 4945.79351,
-    "high": 4951.37737,
-    "low": 4942.14598,
-    "close": 4944.75641,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770184500000,
-    "open": 4944.68242,
-    "high": 4950.16327,
-    "low": 4944.68242,
-    "close": 4947.88399,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770184800000,
-    "open": 4948.25108,
-    "high": 4957.29047,
-    "low": 4947.87068,
-    "close": 4956.77853,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770185100000,
-    "open": 4957.04886,
-    "high": 4967.11337,
-    "low": 4956.76702,
-    "close": 4967.11337,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770185400000,
-    "open": 4966.4951,
-    "high": 4981.76508,
-    "low": 4966.4951,
-    "close": 4981.76508,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770185700000,
-    "open": 4980.29698,
-    "high": 4998.54567,
-    "low": 4980.29698,
-    "close": 4994.80746,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770186000000,
-    "open": 4994.73243,
-    "high": 4996.09399,
-    "low": 4991.62746,
-    "close": 4995.66094,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770186300000,
-    "open": 4995.19077,
-    "high": 4995.66446,
-    "low": 4981.80881,
-    "close": 4981.86621,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770186600000,
-    "open": 4981.64689,
-    "high": 4983.87235,
-    "low": 4972.22104,
-    "close": 4980.27783,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770186900000,
-    "open": 4979.6737,
-    "high": 4992.62457,
-    "low": 4979.6737,
-    "close": 4988.84464,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770187200000,
-    "open": 4987.74883,
-    "high": 4988.82124,
-    "low": 4982.57218,
-    "close": 4986.19955,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770187500000,
-    "open": 4986.33509,
-    "high": 5004.83339,
-    "low": 4986.20598,
-    "close": 5001.5832,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770187800000,
-    "open": 5001.59309,
-    "high": 5002.7794,
-    "low": 4995.93716,
-    "close": 5000.19613,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770188100000,
-    "open": 5000.57801,
-    "high": 5015.70016,
-    "low": 5000.21644,
-    "close": 5014.75579,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770188400000,
-    "open": 5014.07255,
-    "high": 5015.09068,
-    "low": 5006.08305,
-    "close": 5015.09068,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770188700000,
-    "open": 5014.96879,
-    "high": 5035.25544,
-    "low": 5014.94132,
-    "close": 5035.25544,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770189000000,
-    "open": 5034.79012,
-    "high": 5051.75436,
-    "low": 5034.79012,
-    "close": 5049.74969,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770189300000,
-    "open": 5049.78902,
-    "high": 5051.1919,
-    "low": 5047.37868,
-    "close": 5050.50346,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770189600000,
-    "open": 5051.53059,
-    "high": 5055.24409,
-    "low": 5033.47138,
-    "close": 5050.18495,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770189900000,
-    "open": 5049.44187,
-    "high": 5050.15788,
-    "low": 5032.54004,
-    "close": 5035.10028,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770190200000,
-    "open": 5034.82914,
-    "high": 5035.12356,
-    "low": 5027.04538,
-    "close": 5028.34339,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770190500000,
-    "open": 5028.81461,
-    "high": 5034.34846,
-    "low": 5009.85652,
-    "close": 5014.06862,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770190800000,
-    "open": 5014.48297,
-    "high": 5037.88984,
-    "low": 5014.07896,
-    "close": 5035.2405,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770191100000,
-    "open": 5035.94001,
-    "high": 5047.12553,
-    "low": 5026.84923,
-    "close": 5047.12553,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770191400000,
-    "open": 5047.35022,
-    "high": 5049.65928,
-    "low": 5038.4345,
-    "close": 5039.13839,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770191700000,
-    "open": 5038.77023,
-    "high": 5044.59145,
-    "low": 5038.02006,
-    "close": 5044.59145,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770192000000,
-    "open": 5044.30736,
-    "high": 5064.02352,
-    "low": 5044.30736,
-    "close": 5060.64497,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770192300000,
-    "open": 5060.68904,
-    "high": 5063.53226,
-    "low": 5057.19187,
-    "close": 5061.42441,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770192600000,
-    "open": 5061.25696,
-    "high": 5063.15784,
-    "low": 5056.02404,
-    "close": 5057.19919,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770192900000,
-    "open": 5058.26247,
-    "high": 5068.66314,
-    "low": 5056.63233,
-    "close": 5062.2679,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770193200000,
-    "open": 5062.21276,
-    "high": 5063.43295,
-    "low": 5052.19225,
-    "close": 5056.59878,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770193500000,
-    "open": 5056.45571,
-    "high": 5065.67672,
-    "low": 5056.45571,
-    "close": 5058.9891,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770193800000,
-    "open": 5058.97464,
-    "high": 5059.03839,
-    "low": 5046.87024,
-    "close": 5046.87024,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770194100000,
-    "open": 5046.71661,
-    "high": 5048.35609,
-    "low": 5040.11618,
-    "close": 5043.7384,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770194400000,
-    "open": 5043.99713,
-    "high": 5061.58682,
-    "low": 5043.72452,
-    "close": 5059.88072,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770194700000,
-    "open": 5059.82758,
-    "high": 5063.34924,
-    "low": 5052.25597,
-    "close": 5058.19565,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770195000000,
-    "open": 5057.52926,
-    "high": 5058.17844,
-    "low": 5036.08041,
-    "close": 5042.05586,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770195300000,
-    "open": 5042.06141,
-    "high": 5044.41293,
-    "low": 5037.59999,
-    "close": 5042.50816,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770195600000,
-    "open": 5041.78319,
-    "high": 5046.55669,
-    "low": 5038.73702,
-    "close": 5046.55669,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770195900000,
-    "open": 5045.76088,
-    "high": 5052.85151,
-    "low": 5044.98047,
-    "close": 5049.04237,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770196200000,
-    "open": 5048.49003,
-    "high": 5055.86363,
-    "low": 5046.38575,
-    "close": 5050.41205,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770196500000,
-    "open": 5050.24028,
-    "high": 5051.46377,
-    "low": 5039.21233,
-    "close": 5044.9158,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770196800000,
-    "open": 5044.87337,
-    "high": 5048.53502,
-    "low": 5041.03514,
-    "close": 5045.0059,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770197100000,
-    "open": 5044.98994,
-    "high": 5054.81237,
-    "low": 5044.2819,
-    "close": 5052.60942,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770197400000,
-    "open": 5052.4733,
-    "high": 5056.97537,
-    "low": 5052.4733,
-    "close": 5056.90004,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770197700000,
-    "open": 5056.14647,
-    "high": 5070.02358,
-    "low": 5056.14647,
-    "close": 5070.02358,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770198000000,
-    "open": 5070.02739,
-    "high": 5071.10367,
-    "low": 5063.52317,
-    "close": 5065.6305,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770198300000,
-    "open": 5065.98408,
-    "high": 5068.69584,
-    "low": 5061.19903,
-    "close": 5066.19292,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770198600000,
-    "open": 5066.27362,
-    "high": 5074.17083,
-    "low": 5065.17044,
-    "close": 5073.03678,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770198900000,
-    "open": 5073.04621,
-    "high": 5073.08971,
-    "low": 5067.36556,
-    "close": 5069.54366,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770199200000,
-    "open": 5069.45662,
-    "high": 5069.85882,
-    "low": 5066.48944,
-    "close": 5066.48944,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770199500000,
-    "open": 5066.65014,
-    "high": 5070.09476,
-    "low": 5063.65081,
-    "close": 5066.76011,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770199800000,
-    "open": 5066.2636,
-    "high": 5073.27116,
-    "low": 5066.2636,
-    "close": 5073.1067,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770200100000,
-    "open": 5073.0111,
-    "high": 5073.21614,
-    "low": 5066.33465,
-    "close": 5066.9781,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770200400000,
-    "open": 5066.87169,
-    "high": 5067.57217,
-    "low": 5059.29529,
-    "close": 5061.44613,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770200700000,
-    "open": 5061.44507,
-    "high": 5065.08191,
-    "low": 5061.44507,
-    "close": 5062.82725,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770201000000,
-    "open": 5062.64402,
-    "high": 5067.89281,
-    "low": 5061.85581,
-    "close": 5066.28835,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770201300000,
-    "open": 5066.08206,
-    "high": 5070.87594,
-    "low": 5066.08206,
-    "close": 5069.46294,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770201600000,
-    "open": 5069.74152,
-    "high": 5073.80655,
-    "low": 5067.9932,
-    "close": 5069.63425,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770201900000,
-    "open": 5070.03351,
-    "high": 5076.01167,
-    "low": 5069.4682,
-    "close": 5076.01167,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770202200000,
-    "open": 5075.74623,
-    "high": 5078.88912,
-    "low": 5075.74623,
-    "close": 5078.70092,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770202500000,
-    "open": 5078.66754,
-    "high": 5080.39898,
-    "low": 5077.78492,
-    "close": 5080.21163,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770202800000,
-    "open": 5080.12584,
-    "high": 5080.24023,
-    "low": 5077.9017,
-    "close": 5078.72975,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770203100000,
-    "open": 5078.69152,
-    "high": 5081.08651,
-    "low": 5076.87112,
-    "close": 5080.37822,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770203400000,
-    "open": 5079.9253,
-    "high": 5083.55452,
-    "low": 5079.9253,
-    "close": 5082.86161,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770203700000,
-    "open": 5082.93862,
-    "high": 5085.07233,
-    "low": 5082.06985,
-    "close": 5082.06985,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770204000000,
-    "open": 5082.12328,
-    "high": 5082.13909,
-    "low": 5080.43977,
-    "close": 5080.81979,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770204300000,
-    "open": 5080.76969,
-    "high": 5081.79342,
-    "low": 5079.40169,
-    "close": 5079.64767,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770204600000,
-    "open": 5079.77969,
-    "high": 5082.34792,
-    "low": 5074.76594,
-    "close": 5077.80592,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770204900000,
-    "open": 5077.53956,
-    "high": 5077.77006,
-    "low": 5072.56963,
-    "close": 5075.84101,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770205200000,
-    "open": 5075.50031,
-    "high": 5085.8779,
-    "low": 5075.50031,
-    "close": 5082.67435,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770205500000,
-    "open": 5082.62061,
-    "high": 5088.73965,
-    "low": 5082.62061,
-    "close": 5088.73965,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770205800000,
-    "open": 5088.6715,
-    "high": 5089.55376,
-    "low": 5083.19742,
-    "close": 5085.19787,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770206100000,
-    "open": 5084.96379,
-    "high": 5085.20579,
-    "low": 5079.07677,
-    "close": 5079.72668,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770206400000,
-    "open": 5079.43171,
-    "high": 5080.11517,
-    "low": 5077.98956,
-    "close": 5077.99741,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770206700000,
-    "open": 5077.95867,
-    "high": 5078.44518,
-    "low": 5060.27765,
-    "close": 5060.27765,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770207000000,
-    "open": 5059.99209,
-    "high": 5064.31459,
-    "low": 5059.60336,
-    "close": 5061.30752,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770207300000,
-    "open": 5061.62583,
-    "high": 5066.446,
-    "low": 5053.10733,
-    "close": 5066.446,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
-    "timestamp": 1770207600000,
-    "open": 5066.1105,
-    "high": 5066.40899,
-    "low": 5056.61853,
-    "close": 5057.75009,
-    "volume": 0
-  },
-  {
-    "symbol": "XAU/USD",
     "timestamp": 1770207900000,
     "open": 5057.59361,
     "high": 5059.1108,
@@ -44995,8 +43348,1655 @@
     "timestamp": 1771653000000,
     "open": 5098.5141,
     "high": 5098.73331,
-    "low": 5098.4692,
-    "close": 5098.4764,
+    "low": 5098.44174,
+    "close": 5098.63599,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771653300000,
+    "open": 5098.52256,
+    "high": 5098.73696,
+    "low": 5098.47112,
+    "close": 5098.54982,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771653600000,
+    "open": 5098.5126,
+    "high": 5098.74301,
+    "low": 5098.45345,
+    "close": 5098.48572,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771653900000,
+    "open": 5098.52256,
+    "high": 5098.71495,
+    "low": 5098.45946,
+    "close": 5098.55719,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771654200000,
+    "open": 5098.51242,
+    "high": 5098.71001,
+    "low": 5098.43212,
+    "close": 5098.60952,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771654500000,
+    "open": 5098.49483,
+    "high": 5098.71469,
+    "low": 5098.44683,
+    "close": 5098.52551,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771654800000,
+    "open": 5098.49812,
+    "high": 5098.71812,
+    "low": 5098.44178,
+    "close": 5098.4606,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771655100000,
+    "open": 5098.49741,
+    "high": 5098.70238,
+    "low": 5098.43025,
+    "close": 5098.55007,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771655400000,
+    "open": 5098.49766,
+    "high": 5098.69856,
+    "low": 5098.43175,
+    "close": 5098.60843,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771655700000,
+    "open": 5098.49481,
+    "high": 5098.71661,
+    "low": 5098.44099,
+    "close": 5098.52484,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771656000000,
+    "open": 5098.50288,
+    "high": 5098.71817,
+    "low": 5098.45019,
+    "close": 5098.46971,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771656300000,
+    "open": 5098.5052,
+    "high": 5098.71483,
+    "low": 5098.43686,
+    "close": 5098.56108,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771656600000,
+    "open": 5098.50308,
+    "high": 5098.70554,
+    "low": 5098.44219,
+    "close": 5098.61994,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771656900000,
+    "open": 5098.50877,
+    "high": 5098.73038,
+    "low": 5098.44463,
+    "close": 5098.5211,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771657200000,
+    "open": 5098.50568,
+    "high": 5098.72021,
+    "low": 5098.46769,
+    "close": 5098.47411,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771657500000,
+    "open": 5098.50778,
+    "high": 5098.72168,
+    "low": 5098.4391,
+    "close": 5098.56994,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771657800000,
+    "open": 5098.50582,
+    "high": 5098.69521,
+    "low": 5098.44385,
+    "close": 5098.6125,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771658100000,
+    "open": 5098.50258,
+    "high": 5098.72488,
+    "low": 5098.44104,
+    "close": 5098.51456,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771658400000,
+    "open": 5098.50568,
+    "high": 5098.71281,
+    "low": 5098.47345,
+    "close": 5098.47405,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771658700000,
+    "open": 5098.50517,
+    "high": 5098.72223,
+    "low": 5098.43734,
+    "close": 5098.57619,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771659000000,
+    "open": 5098.50568,
+    "high": 5098.68647,
+    "low": 5098.44397,
+    "close": 5098.60177,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771659300000,
+    "open": 5098.49477,
+    "high": 5098.71561,
+    "low": 5098.43029,
+    "close": 5098.49994,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771659600000,
+    "open": 5098.49795,
+    "high": 5098.70134,
+    "low": 5098.46946,
+    "close": 5098.46946,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771659900000,
+    "open": 5098.49788,
+    "high": 5098.71912,
+    "low": 5098.43166,
+    "close": 5098.57767,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771660200000,
+    "open": 5098.50039,
+    "high": 5098.66872,
+    "low": 5098.45066,
+    "close": 5098.60106,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771660500000,
+    "open": 5098.49736,
+    "high": 5098.71561,
+    "low": 5098.43157,
+    "close": 5098.4943,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771660800000,
+    "open": 5098.49788,
+    "high": 5098.69469,
+    "low": 5098.47303,
+    "close": 5098.47303,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771661100000,
+    "open": 5098.4984,
+    "high": 5098.72261,
+    "low": 5098.43481,
+    "close": 5098.58057,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771661400000,
+    "open": 5098.4979,
+    "high": 5098.67247,
+    "low": 5098.46461,
+    "close": 5098.61059,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771661700000,
+    "open": 5098.51192,
+    "high": 5098.72664,
+    "low": 5098.43649,
+    "close": 5098.49999,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771662000000,
+    "open": 5098.5083,
+    "high": 5098.69558,
+    "low": 5098.48191,
+    "close": 5098.48191,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771662300000,
+    "open": 5098.50256,
+    "high": 5098.72238,
+    "low": 5098.43587,
+    "close": 5098.59568,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771662600000,
+    "open": 5098.50824,
+    "high": 5098.6617,
+    "low": 5098.47266,
+    "close": 5098.60634,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771662900000,
+    "open": 5098.51088,
+    "high": 5098.72996,
+    "low": 5098.44242,
+    "close": 5098.49222,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771663200000,
+    "open": 5098.50581,
+    "high": 5098.69008,
+    "low": 5098.49406,
+    "close": 5098.49406,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771663500000,
+    "open": 5098.51036,
+    "high": 5098.72891,
+    "low": 5098.44368,
+    "close": 5098.60066,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771663800000,
+    "open": 5098.50819,
+    "high": 5098.65162,
+    "low": 5098.48157,
+    "close": 5098.60163,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771664100000,
+    "open": 5098.5119,
+    "high": 5098.7267,
+    "low": 5098.43903,
+    "close": 5098.49004,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771664400000,
+    "open": 5098.50839,
+    "high": 5098.67799,
+    "low": 5098.49911,
+    "close": 5098.49911,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771664700000,
+    "open": 5098.50987,
+    "high": 5098.72389,
+    "low": 5098.44205,
+    "close": 5098.60262,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771665000000,
+    "open": 5098.50542,
+    "high": 5098.66018,
+    "low": 5098.49684,
+    "close": 5098.59683,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771665300000,
+    "open": 5098.51138,
+    "high": 5098.73304,
+    "low": 5098.44466,
+    "close": 5098.48831,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771665600000,
+    "open": 5098.51088,
+    "high": 5098.66793,
+    "low": 5098.50397,
+    "close": 5098.50441,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771665900000,
+    "open": 5098.51088,
+    "high": 5098.72556,
+    "low": 5098.44163,
+    "close": 5098.60671,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771666200000,
+    "open": 5098.50533,
+    "high": 5098.67074,
+    "low": 5098.5023,
+    "close": 5098.58357,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771666500000,
+    "open": 5098.50308,
+    "high": 5098.73009,
+    "low": 5098.44062,
+    "close": 5098.47093,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771666800000,
+    "open": 5098.49848,
+    "high": 5098.64803,
+    "low": 5098.47986,
+    "close": 5098.49498,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771667100000,
+    "open": 5098.49576,
+    "high": 5098.71731,
+    "low": 5098.42702,
+    "close": 5098.60311,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771667400000,
+    "open": 5098.49811,
+    "high": 5098.67446,
+    "low": 5098.48111,
+    "close": 5098.57153,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771667700000,
+    "open": 5098.49788,
+    "high": 5098.7182,
+    "low": 5098.43296,
+    "close": 5098.47025,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771668000000,
+    "open": 5098.50024,
+    "high": 5098.64251,
+    "low": 5098.47254,
+    "close": 5098.50356,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771668300000,
+    "open": 5098.49833,
+    "high": 5098.72171,
+    "low": 5098.43156,
+    "close": 5098.60594,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771668600000,
+    "open": 5098.49684,
+    "high": 5098.6824,
+    "low": 5098.4894,
+    "close": 5098.57914,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771668900000,
+    "open": 5098.51177,
+    "high": 5098.73151,
+    "low": 5098.43946,
+    "close": 5098.47308,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771669200000,
+    "open": 5098.50624,
+    "high": 5098.66597,
+    "low": 5098.47038,
+    "close": 5098.52223,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771669500000,
+    "open": 5098.51002,
+    "high": 5098.72776,
+    "low": 5098.44745,
+    "close": 5098.61596,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771669800000,
+    "open": 5098.50508,
+    "high": 5098.69795,
+    "low": 5098.48809,
+    "close": 5098.57319,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771670100000,
+    "open": 5098.5113,
+    "high": 5098.72683,
+    "low": 5098.43649,
+    "close": 5098.47081,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771670400000,
+    "open": 5098.50662,
+    "high": 5098.67891,
+    "low": 5098.46273,
+    "close": 5098.52847,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771670700000,
+    "open": 5098.51007,
+    "high": 5098.73281,
+    "low": 5098.44624,
+    "close": 5098.62054,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771671000000,
+    "open": 5098.50794,
+    "high": 5098.7079,
+    "low": 5098.48436,
+    "close": 5098.5663,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771671300000,
+    "open": 5098.51088,
+    "high": 5098.73002,
+    "low": 5098.43981,
+    "close": 5098.46912,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771671600000,
+    "open": 5098.50638,
+    "high": 5098.68632,
+    "low": 5098.45569,
+    "close": 5098.53485,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771671900000,
+    "open": 5098.5105,
+    "high": 5098.72632,
+    "low": 5098.44355,
+    "close": 5098.61935,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771672200000,
+    "open": 5098.50494,
+    "high": 5098.71169,
+    "low": 5098.48093,
+    "close": 5098.55445,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771672500000,
+    "open": 5098.50496,
+    "high": 5098.73209,
+    "low": 5098.44166,
+    "close": 5098.468,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771672800000,
+    "open": 5098.50645,
+    "high": 5098.69537,
+    "low": 5098.4498,
+    "close": 5098.54154,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771673100000,
+    "open": 5098.5102,
+    "high": 5098.72391,
+    "low": 5098.44206,
+    "close": 5098.62017,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771673400000,
+    "open": 5098.50488,
+    "high": 5098.71707,
+    "low": 5098.47513,
+    "close": 5098.55552,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771673700000,
+    "open": 5098.51412,
+    "high": 5098.73298,
+    "low": 5098.44214,
+    "close": 5098.46748,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771674000000,
+    "open": 5098.50609,
+    "high": 5098.70098,
+    "low": 5098.44483,
+    "close": 5098.54829,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771674300000,
+    "open": 5098.51057,
+    "high": 5098.72028,
+    "low": 5098.44701,
+    "close": 5098.62559,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771674600000,
+    "open": 5098.51003,
+    "high": 5098.72637,
+    "low": 5098.473,
+    "close": 5098.55756,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771674900000,
+    "open": 5098.52214,
+    "high": 5098.74308,
+    "low": 5098.45335,
+    "close": 5098.48311,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771675200000,
+    "open": 5098.52171,
+    "high": 5098.72296,
+    "low": 5098.45726,
+    "close": 5098.56525,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771675500000,
+    "open": 5098.52128,
+    "high": 5098.72125,
+    "low": 5098.44236,
+    "close": 5098.62262,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771675800000,
+    "open": 5098.50783,
+    "high": 5098.72723,
+    "low": 5098.46073,
+    "close": 5098.53703,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771676100000,
+    "open": 5098.50803,
+    "high": 5098.73425,
+    "low": 5098.45844,
+    "close": 5098.4708,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771676400000,
+    "open": 5098.50828,
+    "high": 5098.7143,
+    "low": 5098.44096,
+    "close": 5098.56195,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771676700000,
+    "open": 5098.51088,
+    "high": 5098.71286,
+    "low": 5098.44174,
+    "close": 5098.62421,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771677000000,
+    "open": 5098.51041,
+    "high": 5098.73184,
+    "low": 5098.45749,
+    "close": 5098.53297,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771677300000,
+    "open": 5098.51108,
+    "high": 5098.72903,
+    "low": 5098.45996,
+    "close": 5098.47209,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771677600000,
+    "open": 5098.50876,
+    "high": 5098.72227,
+    "low": 5098.43952,
+    "close": 5098.56596,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771677900000,
+    "open": 5098.50846,
+    "high": 5098.70621,
+    "low": 5098.44472,
+    "close": 5098.62264,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771678200000,
+    "open": 5098.51039,
+    "high": 5098.73283,
+    "low": 5098.45264,
+    "close": 5098.52922,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771678500000,
+    "open": 5098.5138,
+    "high": 5098.72289,
+    "low": 5098.46714,
+    "close": 5098.4766,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771678800000,
+    "open": 5098.51137,
+    "high": 5098.72929,
+    "low": 5098.44181,
+    "close": 5098.57501,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771679100000,
+    "open": 5098.51074,
+    "high": 5098.69852,
+    "low": 5098.4514,
+    "close": 5098.61796,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771679400000,
+    "open": 5098.50778,
+    "high": 5098.73021,
+    "low": 5098.44628,
+    "close": 5098.52007,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771679700000,
+    "open": 5098.51111,
+    "high": 5098.71824,
+    "low": 5098.47383,
+    "close": 5098.47383,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771680000000,
+    "open": 5098.5067,
+    "high": 5098.72998,
+    "low": 5098.43728,
+    "close": 5098.58144,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771680300000,
+    "open": 5098.51069,
+    "high": 5098.68727,
+    "low": 5098.45672,
+    "close": 5098.61267,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771680600000,
+    "open": 5098.50517,
+    "high": 5098.72637,
+    "low": 5098.44096,
+    "close": 5098.51116,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771680900000,
+    "open": 5098.50835,
+    "high": 5098.71241,
+    "low": 5098.4768,
+    "close": 5098.4768,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771681200000,
+    "open": 5098.50774,
+    "high": 5098.73708,
+    "low": 5098.43918,
+    "close": 5098.59523,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771681500000,
+    "open": 5098.51857,
+    "high": 5098.6843,
+    "low": 5098.47288,
+    "close": 5098.61765,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771681800000,
+    "open": 5098.51192,
+    "high": 5098.73207,
+    "low": 5098.45255,
+    "close": 5098.51882,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771682100000,
+    "open": 5098.52137,
+    "high": 5098.71935,
+    "low": 5098.48756,
+    "close": 5098.48756,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771682400000,
+    "open": 5098.51504,
+    "high": 5098.74334,
+    "low": 5098.44939,
+    "close": 5098.60044,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771682700000,
+    "open": 5098.51868,
+    "high": 5098.69095,
+    "low": 5098.489,
+    "close": 5098.63263,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771683000000,
+    "open": 5098.53115,
+    "high": 5098.74892,
+    "low": 5098.46514,
+    "close": 5098.51973,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771683300000,
+    "open": 5098.52642,
+    "high": 5098.70912,
+    "low": 5098.489,
+    "close": 5098.489,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771683600000,
+    "open": 5098.51192,
+    "high": 5098.73807,
+    "low": 5098.44409,
+    "close": 5098.60597,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771683900000,
+    "open": 5098.5188,
+    "high": 5098.66355,
+    "low": 5098.48548,
+    "close": 5098.60708,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771684200000,
+    "open": 5098.50932,
+    "high": 5098.72957,
+    "low": 5098.45019,
+    "close": 5098.50532,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771684500000,
+    "open": 5098.51849,
+    "high": 5098.70048,
+    "low": 5098.49341,
+    "close": 5098.49341,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771684800000,
+    "open": 5098.51242,
+    "high": 5098.73924,
+    "low": 5098.45178,
+    "close": 5098.61082,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771685100000,
+    "open": 5098.51884,
+    "high": 5098.66144,
+    "low": 5098.49635,
+    "close": 5098.60519,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771685400000,
+    "open": 5098.51245,
+    "high": 5098.7344,
+    "low": 5098.45196,
+    "close": 5098.49574,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771685700000,
+    "open": 5098.51326,
+    "high": 5098.6884,
+    "low": 5098.4984,
+    "close": 5098.4984,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771686000000,
+    "open": 5098.5124,
+    "high": 5098.73695,
+    "low": 5098.44222,
+    "close": 5098.61552,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771686300000,
+    "open": 5098.51868,
+    "high": 5098.67238,
+    "low": 5098.50387,
+    "close": 5098.5974,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771686600000,
+    "open": 5098.50937,
+    "high": 5098.73291,
+    "low": 5098.45498,
+    "close": 5098.4858,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771686900000,
+    "open": 5098.50812,
+    "high": 5098.66765,
+    "low": 5098.50121,
+    "close": 5098.5017,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771687200000,
+    "open": 5098.50828,
+    "high": 5098.72406,
+    "low": 5098.43649,
+    "close": 5098.60935,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771687500000,
+    "open": 5098.50828,
+    "high": 5098.67343,
+    "low": 5098.49997,
+    "close": 5098.58855,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771687800000,
+    "open": 5098.50828,
+    "high": 5098.7276,
+    "low": 5098.44361,
+    "close": 5098.48432,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771688100000,
+    "open": 5098.51048,
+    "high": 5098.66198,
+    "low": 5098.49338,
+    "close": 5098.5044,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771688400000,
+    "open": 5098.50616,
+    "high": 5098.72996,
+    "low": 5098.43727,
+    "close": 5098.61045,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771688700000,
+    "open": 5098.50525,
+    "high": 5098.6806,
+    "low": 5098.49725,
+    "close": 5098.5831,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771689000000,
+    "open": 5098.5064,
+    "high": 5098.73438,
+    "low": 5098.44664,
+    "close": 5098.49193,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771689300000,
+    "open": 5098.52057,
+    "high": 5098.66265,
+    "low": 5098.49539,
+    "close": 5098.51742,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771689600000,
+    "open": 5098.51486,
+    "high": 5098.7424,
+    "low": 5098.45434,
+    "close": 5098.62627,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771689900000,
+    "open": 5098.51919,
+    "high": 5098.70226,
+    "low": 5098.49576,
+    "close": 5098.58277,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771690200000,
+    "open": 5098.51258,
+    "high": 5098.72941,
+    "low": 5098.44993,
+    "close": 5098.48613,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771690500000,
+    "open": 5098.51784,
+    "high": 5098.66415,
+    "low": 5098.48355,
+    "close": 5098.52118,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771690800000,
+    "open": 5098.51218,
+    "high": 5098.74075,
+    "low": 5098.44686,
+    "close": 5098.62891,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771691100000,
+    "open": 5098.51957,
+    "high": 5098.71079,
+    "low": 5098.48878,
+    "close": 5098.58726,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771691400000,
+    "open": 5098.52302,
+    "high": 5098.74629,
+    "low": 5098.46254,
+    "close": 5098.49993,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771691700000,
+    "open": 5098.53427,
+    "high": 5098.6971,
+    "low": 5098.49324,
+    "close": 5098.52295,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771692000000,
+    "open": 5098.50731,
+    "high": 5098.74062,
+    "low": 5098.44671,
+    "close": 5098.63091,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771692300000,
+    "open": 5098.51968,
+    "high": 5098.71816,
+    "low": 5098.48486,
+    "close": 5098.56143,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771692600000,
+    "open": 5098.50411,
+    "high": 5098.72955,
+    "low": 5098.45018,
+    "close": 5098.48214,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771692900000,
+    "open": 5098.51762,
+    "high": 5098.68472,
+    "low": 5098.46882,
+    "close": 5098.53413,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771693200000,
+    "open": 5098.51201,
+    "high": 5098.73936,
+    "low": 5098.44391,
+    "close": 5098.63233,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771693500000,
+    "open": 5098.51978,
+    "high": 5098.72457,
+    "low": 5098.48145,
+    "close": 5098.56077,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771693800000,
+    "open": 5098.50979,
+    "high": 5098.73179,
+    "low": 5098.45201,
+    "close": 5098.48102,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771694100000,
+    "open": 5098.51753,
+    "high": 5098.69391,
+    "low": 5098.46291,
+    "close": 5098.54321,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771694400000,
+    "open": 5098.51417,
+    "high": 5098.73697,
+    "low": 5098.44223,
+    "close": 5098.63316,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771694700000,
+    "open": 5098.51987,
+    "high": 5098.72997,
+    "low": 5098.47652,
+    "close": 5098.55405,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771695000000,
+    "open": 5098.50989,
+    "high": 5098.73814,
+    "low": 5098.46017,
+    "close": 5098.4831,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771695300000,
+    "open": 5098.52004,
+    "high": 5098.70479,
+    "low": 5098.46077,
+    "close": 5098.54756,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771695600000,
+    "open": 5098.51212,
+    "high": 5098.73619,
+    "low": 5098.44428,
+    "close": 5098.63599,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771695900000,
+    "open": 5098.52255,
+    "high": 5098.7368,
+    "low": 5098.47127,
+    "close": 5098.5473,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771696200000,
+    "open": 5098.50971,
+    "high": 5098.73288,
+    "low": 5098.45887,
+    "close": 5098.48055,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771696500000,
+    "open": 5098.51736,
+    "high": 5098.70972,
+    "low": 5098.45423,
+    "close": 5098.55431,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771696800000,
+    "open": 5098.5117,
+    "high": 5098.7289,
+    "low": 5098.44227,
+    "close": 5098.63303,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771697100000,
+    "open": 5098.52003,
+    "high": 5098.73758,
+    "low": 5098.46162,
+    "close": 5098.54055,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771697400000,
+    "open": 5098.51012,
+    "high": 5098.7264,
+    "low": 5098.45635,
+    "close": 5098.47087,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771697700000,
+    "open": 5098.50782,
+    "high": 5098.71172,
+    "low": 5098.441,
+    "close": 5098.55661,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771698000000,
+    "open": 5098.50591,
+    "high": 5098.71252,
+    "low": 5098.43907,
+    "close": 5098.6216,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771698300000,
+    "open": 5098.50875,
+    "high": 5098.72942,
+    "low": 5098.44978,
+    "close": 5098.5279,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771698600000,
+    "open": 5098.50484,
+    "high": 5098.73187,
+    "low": 5098.46483,
+    "close": 5098.47722,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771698900000,
+    "open": 5098.51348,
+    "high": 5098.72461,
+    "low": 5098.44477,
+    "close": 5098.57064,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771699200000,
+    "open": 5098.51348,
+    "high": 5098.71167,
+    "low": 5098.44964,
+    "close": 5098.62538,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771699500000,
+    "open": 5098.51348,
+    "high": 5098.73553,
+    "low": 5098.45298,
+    "close": 5098.52954,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771699800000,
+    "open": 5098.51348,
+    "high": 5098.72841,
+    "low": 5098.4719,
+    "close": 5098.47903,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771700100000,
+    "open": 5098.51348,
+    "high": 5098.72899,
+    "low": 5098.44428,
+    "close": 5098.5771,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771700400000,
+    "open": 5098.51348,
+    "high": 5098.70412,
+    "low": 5098.45364,
+    "close": 5098.62328,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771700700000,
+    "open": 5098.51348,
+    "high": 5098.73545,
+    "low": 5098.44914,
+    "close": 5098.52317,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771701000000,
+    "open": 5098.51348,
+    "high": 5098.72387,
+    "low": 5098.4799,
+    "close": 5098.48142,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771701300000,
+    "open": 5098.51348,
+    "high": 5098.73229,
+    "low": 5098.44493,
+    "close": 5098.58337,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771701600000,
+    "open": 5098.51348,
+    "high": 5098.69569,
+    "low": 5098.45871,
+    "close": 5098.62062,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771701900000,
+    "open": 5098.51348,
+    "high": 5098.73423,
+    "low": 5098.44639,
+    "close": 5098.51702,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771702200000,
+    "open": 5098.51348,
+    "high": 5098.71828,
+    "low": 5098.48435,
+    "close": 5098.48435,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771702500000,
+    "open": 5098.51348,
+    "high": 5098.73447,
+    "low": 5098.44672,
+    "close": 5098.58939,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771702800000,
+    "open": 5098.51348,
+    "high": 5098.68643,
+    "low": 5098.4648,
+    "close": 5098.61742,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771703100000,
+    "open": 5098.51348,
+    "high": 5098.73188,
+    "low": 5098.44477,
+    "close": 5098.51113,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771703400000,
+    "open": 5098.51348,
+    "high": 5098.71169,
+    "low": 5098.48781,
+    "close": 5098.48781,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771703700000,
+    "open": 5098.51348,
+    "high": 5098.73553,
+    "low": 5098.44962,
+    "close": 5098.59512,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771704000000,
+    "open": 5098.51348,
+    "high": 5098.67642,
+    "low": 5098.47187,
+    "close": 5098.61371,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771704300000,
+    "open": 5098.51348,
+    "high": 5098.72897,
+    "low": 5098.44428,
+    "close": 5098.50557,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771704600000,
+    "open": 5098.51348,
+    "high": 5098.70416,
+    "low": 5098.49176,
+    "close": 5098.49176,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771704900000,
+    "open": 5098.51348,
+    "high": 5098.73545,
+    "low": 5098.44915,
+    "close": 5098.60051,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771705200000,
+    "open": 5098.51348,
+    "high": 5098.66573,
+    "low": 5098.47986,
+    "close": 5098.60951,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771705500000,
+    "open": 5098.51348,
+    "high": 5098.73227,
+    "low": 5098.44493,
+    "close": 5098.50037,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771705800000,
+    "open": 5098.51348,
+    "high": 5098.69572,
+    "low": 5098.49619,
+    "close": 5098.49619,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771706100000,
+    "open": 5098.51348,
+    "high": 5098.73423,
+    "low": 5098.4464,
+    "close": 5098.60552,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771706400000,
+    "open": 5098.51348,
+    "high": 5098.65601,
+    "low": 5098.48872,
+    "close": 5098.60486,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771706700000,
+    "open": 5098.51348,
+    "high": 5098.73447,
+    "low": 5098.44671,
+    "close": 5098.49556,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771707000000,
+    "open": 5098.51348,
+    "high": 5098.68647,
+    "low": 5098.50105,
+    "close": 5098.50105,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771707300000,
+    "open": 5098.51348,
+    "high": 5098.73189,
+    "low": 5098.44478,
+    "close": 5098.61011,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771707600000,
+    "open": 5098.51348,
+    "high": 5098.66721,
+    "low": 5098.49836,
+    "close": 5098.5998,
+    "volume": 0
+  },
+  {
+    "symbol": "XAU/USD",
+    "timestamp": 1771707900000,
+    "open": 5098.51348,
+    "high": 5098.73553,
+    "low": 5098.44961,
+    "close": 5098.47529,
     "volume": 0
   }
 ]

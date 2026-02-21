@@ -3,11 +3,13 @@
     "SYMBOL": "XAU/USD",
     "DAYS": 90,
     "MIN_CONFIDENCE": 60,
-    "TIMEFRAME": "5min"
+    "TIMEFRAME": "5min",
+    "mtfEnabled": true,
+    "macroEnabled": true
   },
   "allSignals": {
     "totalCandles": 5000,
-    "totalSignals": 14
+    "totalSignals": 3
   },
   "results": [
     {
@@ -18,12 +20,14 @@
       "stopLoss": 4997.12883132898,
       "takeProfit": 5061.85072167755,
       "riskReward": 2.5,
-      "confidence": 69,
+      "confidence": 85,
       "confluenceCount": 3,
       "reasons": [
         "MACD bullish crossover",
         "Price above EMA 21 & 50",
         "ADX bullish (29)",
+        "1h macro aligned bullish: 1h macro: 4/4 bullish",
+        "15min MTF aligned bullish: 15min: 4/4 bullish (EMA9>21>50, Price>EMA21>50)",
         "With bullish trend (ADX:29)",
         "Bullish price structure",
         "Strong support nearby (str:100)",
@@ -43,42 +47,11 @@
       "outcome": "LOSS",
       "exitPrice": 4997.12883132898,
       "candlesHeld": 23,
-      "pnlR": -1
-    },
-    {
-      "timestamp": 1770842100000,
-      "symbol": "XAU/USD",
-      "action": "SELL",
-      "entryPrice": 5054.0745,
-      "stopLoss": 5077.586960356808,
-      "takeProfit": 4995.293349107978,
-      "riskReward": 2.5,
-      "confidence": 75,
-      "confluenceCount": 4,
-      "reasons": [
-        "MACD bearish crossover",
-        "EMA bearish alignment (9<21<50)",
-        "Price below EMA 21 & 50",
-        "ADX bearish (26)",
-        "With bearish trend (ADX:26)",
-        "Bearish price structure",
-        "Strong resistance nearby (str:100)"
-      ],
-      "context": {
-        "trend": "BEARISH",
-        "trendStrength": 26.34571277557653,
-        "regime": "TRENDING",
-        "session": "NEW_YORK",
-        "volatility": "NORMAL",
-        "support": 5051.665223333333,
-        "resistance": 5060.985943333333,
-        "supportLevels": "5051.67 (str:100 touches:9) | 5040.97 (str:100 touches:1)",
-        "resistanceLevels": "5060.99 (str:100 touches:3) | 5068.22 (str:100 touches:5) | 5077.17 (str:72 touches:2)"
-      },
-      "outcome": "LOSS",
-      "exitPrice": 5077.586960356808,
-      "candlesHeld": 6,
-      "pnlR": -1
+      "pnlR": -1,
+      "macroAction": "BOOSTED",
+      "macroTrend": "BULL✅",
+      "mtfAction": "BOOSTED",
+      "mtfTrend": "BULL✅"
     },
     {
       "timestamp": 1770961500000,
@@ -88,13 +61,15 @@
       "stopLoss": 4929.583880137552,
       "takeProfit": 4869.524579656119,
       "riskReward": 2.5,
-      "confidence": 71,
+      "confidence": 77,
       "confluenceCount": 4,
       "reasons": [
         "MACD bearish crossover",
         "EMA bearish alignment (9<21<50)",
         "Price below EMA 21 & 50",
         "ADX bearish (23)",
+        "1h macro aligned bearish: 1h macro: 4/4 bearish",
+        "15min MTF aligned bearish: 15min: 4/4 bearish (EMA9<21<50, Price<EMA21<50)",
         "With bearish trend (ADX:23)",
         "Bearish price structure",
         "Strong resistance nearby (str:68)"
@@ -113,112 +88,11 @@
       "outcome": "LOSS",
       "exitPrice": 4929.583880137552,
       "candlesHeld": 4,
-      "pnlR": -1
-    },
-    {
-      "timestamp": 1771066200000,
-      "symbol": "XAU/USD",
-      "action": "BUY",
-      "entryPrice": 5043.21945,
-      "stopLoss": 5042.605805400553,
-      "takeProfit": 5044.753561498615,
-      "riskReward": 2.5,
-      "confidence": 66,
-      "confluenceCount": 3,
-      "reasons": [
-        "EMA 9/21 bullish crossover",
-        "Price above EMA 21 & 50",
-        "ADX bullish (38)",
-        "With bullish trend (ADX:38)",
-        "Bullish price structure",
-        "Strong support nearby (str:100)"
-      ],
-      "context": {
-        "trend": "BULLISH",
-        "trendStrength": 38.37679176879282,
-        "regime": "TRENDING",
-        "session": "LONDON",
-        "volatility": "SQUEEZE",
-        "support": 5043.031405000001,
-        "resistance": 5043.327006666666,
-        "supportLevels": "5043.03 (str:100 touches:14) | 5035.46 (str:3 touches:1) | 5023.95 (str:0 touches:1)",
-        "resistanceLevels": "5043.33 (str:100 touches:12) | 5044.24 (str:0 touches:1)"
-      },
-      "outcome": "EXPIRED",
-      "exitPrice": 5043.19991,
-      "candlesHeld": 47,
-      "pnlR": -0.03
-    },
-    {
-      "timestamp": 1771068600000,
-      "symbol": "XAU/USD",
-      "action": "BUY",
-      "entryPrice": 5043.23057,
-      "stopLoss": 5042.613386876176,
-      "takeProfit": 5044.773527809559,
-      "riskReward": 2.5,
-      "confidence": 82,
-      "confluenceCount": 4,
-      "reasons": [
-        "EMA 9/21 bullish crossover",
-        "MACD bullish crossover",
-        "Price above EMA 21 & 50",
-        "ADX bullish (40)",
-        "With bullish trend (ADX:40)",
-        "Bullish price structure",
-        "Strong support nearby (str:100)"
-      ],
-      "context": {
-        "trend": "BULLISH",
-        "trendStrength": 39.67258103649885,
-        "regime": "TRENDING",
-        "session": "LONDON",
-        "volatility": "SQUEEZE",
-        "support": 5043.0318246666675,
-        "resistance": 5043.326924615384,
-        "supportLevels": "5043.03 (str:100 touches:15)",
-        "resistanceLevels": "5043.33 (str:100 touches:13) | 5044.24 (str:0 touches:1)"
-      },
-      "outcome": "EXPIRED",
-      "exitPrice": 5043.20265,
-      "candlesHeld": 47,
-      "pnlR": -0.05
-    },
-    {
-      "timestamp": 1771079400000,
-      "symbol": "XAU/USD",
-      "action": "BUY",
-      "entryPrice": 5043.21407,
-      "stopLoss": 5042.569455441819,
-      "takeProfit": 5044.825606395453,
-      "riskReward": 2.5,
-      "confidence": 86,
-      "confluenceCount": 4,
-      "reasons": [
-        "EMA 9/21 bullish crossover",
-        "MACD bullish crossover",
-        "Price above EMA 21 & 50",
-        "ADX bullish (23)",
-        "With bullish trend (ADX:23)",
-        "Bullish price structure",
-        "Strong support nearby (str:100)",
-        "London/NY overlap"
-      ],
-      "context": {
-        "trend": "BULLISH",
-        "trendStrength": 23.49808163294571,
-        "regime": "RANGING",
-        "session": "OVERLAP",
-        "volatility": "SQUEEZE",
-        "support": 5043.0305725,
-        "resistance": 5043.325930000001,
-        "supportLevels": "5043.03 (str:100 touches:16)",
-        "resistanceLevels": "5043.33 (str:100 touches:15)"
-      },
-      "outcome": "EXPIRED",
-      "exitPrice": 5043.2141,
-      "candlesHeld": 47,
-      "pnlR": 0
+      "pnlR": -1,
+      "macroAction": "BOOSTED",
+      "macroTrend": "BEAR✅",
+      "mtfAction": "BOOSTED",
+      "mtfTrend": "BEAR✅"
     },
     {
       "timestamp": 1771269300000,
@@ -228,13 +102,15 @@
       "stopLoss": 5006.239568511736,
       "takeProfit": 4978.89347872066,
       "riskReward": 2.5,
-      "confidence": 75,
+      "confidence": 87,
       "confluenceCount": 4,
       "reasons": [
         "MACD bearish crossover",
         "EMA bearish alignment (9<21<50)",
         "Price below EMA 21 & 50",
         "ADX bearish (23)",
+        "1h macro aligned bearish: 1h macro: 4/4 bearish",
+        "15min MTF aligned bearish: 15min: 4/4 bearish (EMA9<21<50, Price<EMA21<50)",
         "With bearish trend (ADX:23)",
         "Bearish price structure",
         "Strong resistance nearby (str:100)"
@@ -253,76 +129,11 @@
       "outcome": "WIN",
       "exitPrice": 4978.89347872066,
       "candlesHeld": 21,
-      "pnlR": 2.5
-    },
-    {
-      "timestamp": 1771305000000,
-      "symbol": "XAU/USD",
-      "action": "SELL",
-      "entryPrice": 4991.67869,
-      "stopLoss": 4995.1962636921735,
-      "takeProfit": 4982.884755769565,
-      "riskReward": 2.5,
-      "confidence": 60,
-      "confluenceCount": 5,
-      "reasons": [
-        "CCI crossing below 100",
-        "Breakdown below recent low",
-        "RSI exiting overbought",
-        "Price below EMA 21 & 50",
-        "ADX bearish (22)",
-        "Strong resistance nearby (str:100)"
-      ],
-      "context": {
-        "trend": "NEUTRAL",
-        "trendStrength": 0,
-        "regime": "BREAKOUT",
-        "session": "ASIAN",
-        "volatility": "SQUEEZE",
-        "support": 4990.262205,
-        "resistance": 4992.383087500001,
-        "supportLevels": "4990.26 (str:44 touches:2) | 4989.04 (str:16 touches:1) | 4984.86 (str:46 touches:1)",
-        "resistanceLevels": "4992.38 (str:100 touches:16) | 4993.65 (str:60 touches:1) | 4994.39 (str:75 touches:1)"
-      },
-      "outcome": "LOSS",
-      "exitPrice": 4995.1962636921735,
-      "candlesHeld": 2,
-      "pnlR": -1
-    },
-    {
-      "timestamp": 1771621800000,
-      "symbol": "XAU/USD",
-      "action": "SELL",
-      "entryPrice": 5023.11474,
-      "stopLoss": 5056.281444201724,
-      "takeProfit": 4940.19797949569,
-      "riskReward": 2.5,
-      "confidence": 63,
-      "confluenceCount": 5,
-      "reasons": [
-        "EMA 9/21 bearish crossover",
-        "Price below EMA 21 & 50",
-        "MACD bearish",
-        "MACD sell momentum",
-        "ADX bearish (26)",
-        "Bearish price structure",
-        "Strong resistance nearby (str:100)"
-      ],
-      "context": {
-        "trend": "NEUTRAL",
-        "trendStrength": 0,
-        "regime": "TRENDING",
-        "session": "OFF_HOURS",
-        "volatility": "HIGH",
-        "support": 5016.26113,
-        "resistance": 5025.500614444445,
-        "supportLevels": "5016.26 (str:100 touches:4) | 5009.04 (str:100 touches:3)",
-        "resistanceLevels": "5025.50 (str:100 touches:9) | 5036.89 (str:100 touches:7) | 5046.98 (str:92 touches:2)"
-      },
-      "outcome": "LOSS",
-      "exitPrice": 5056.281444201724,
-      "candlesHeld": 16,
-      "pnlR": -1
+      "pnlR": 2.5,
+      "macroAction": "BOOSTED",
+      "macroTrend": "BEAR✅",
+      "mtfAction": "BOOSTED",
+      "mtfTrend": "BEAR✅"
     }
   ]
 }
