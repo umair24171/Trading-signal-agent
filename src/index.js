@@ -15,7 +15,7 @@ let agentInstance = null;
 http.createServer((req, res) => {
   const health = agentInstance?.getHealthStatus() || {};
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'running', agent: 'Trading Signal Agent v3 (MTF)', uptime: process.uptime(), uptimeFormatted: formatUptime(process.uptime()), ...health }, null, 2));
+  res.end(JSON.stringify({ status: 'running', agent: 'Trading Signal Agent v4 (MTF + Macro)', uptime: process.uptime(), uptimeFormatted: formatUptime(process.uptime()), ...health }, null, 2));
 }).listen(PORT, () => {
   console.log(`🌐 Health server running on port ${PORT}`);
 });
@@ -28,16 +28,16 @@ function formatUptime(seconds) {
 
 console.log(`
 ╔══════════════════════════════════════════════════════════════╗
-║         TRADING SIGNAL AGENT v3 - STARTING UP                ║
+║         TRADING SIGNAL AGENT v4 - STARTING UP                ║
 ║                                                              ║
 ║  Watchlist: ${(process.env.WATCHLIST || '').padEnd(43)}║
 ║  Timeframe: ${(process.env.TIMEFRAME || '5m').padEnd(43)}║
-║  MTF Filter: 15min EMA alignment                             ║
+║  MTF Filter: 15min + 1h Macro Trend                          ║
 ║  Min Confidence: ${((process.env.MIN_CONFIDENCE || '60') + '%').padEnd(38)}║
 ║  Min Confluence: ${((process.env.MIN_CONFLUENCE || '3') + ' signals').padEnd(38)}║
 ║  MT5 Auto-Execute: ${(process.env.MT5_ENABLED === 'true' ? 'ON' : 'OFF').padEnd(36)}║
 ║                                                              ║
-║  NEW v3: Multi-Timeframe 15min Confirmation Filter           ║
+║  NEW v4: 1h Macro Filter (data-proven, blocks 0% WR trades)  ║
 ╚══════════════════════════════════════════════════════════════╝
 `);
 
@@ -66,26 +66,26 @@ class TradingAgent {
     this.tracker.printReport();
 
     await this.telegram.sendMessage(`
-🤖 *Trading Agent v3 Started*
+🤖 *Trading Agent v4 Started*
 
 📊 Watching: ${this.watchlist.join(', ')}
-⏱ Timeframe: ${this.timeframe} + 15min MTF
+⏱ Timeframe: ${this.timeframe} + 15min MTF + 1h Macro
 🎯 Min Confidence: ${this.minConfidence}%
 🔗 Min Confluence: ${this.minConfluence} signals
 
-*v3 Features:*
-• ✅ Multi-Timeframe 15min Confirmation (NEW)
+*v4 Features:*
+• ✅ 1h Macro Trend Filter (NEW — blocks counter-trend)
+• ✅ Multi-Timeframe 15min Confirmation
 • SR Detector v2 (clustered swing levels)
 • Win Rate Tracker (auto SL/TP hit detection)
-• Backtest engine available
 
 📊 Tracker: ${this.tracker.getStats().total} closed signals | ${this.tracker.getStats().winRate}% win rate
     `);
 
-    // Fetch historical data (5min + 15min)
+    // ── FETCH HISTORICAL DATA (5min + 15min) ──
     await this.marketData.fetchHistoricalData();
 
-    // Load 5min historical into engine
+    // ── LOAD 5MIN INTO ENGINE ──
     for (const symbol of this.watchlist) {
       const historicalCandles = this.marketData.getCandles(symbol);
       if (historicalCandles.length > 0) {
@@ -93,27 +93,44 @@ class TradingAgent {
       }
     }
 
-    // Load 15min historical into engine for MTF
+    // ── LOAD 15MIN INTO ENGINE FOR MTF ──
     for (const symbol of this.watchlist) {
       const candles15m = this.marketData.getCandles15m(symbol);
       if (candles15m.length > 0) {
         this.signalEngine.loadMTFCandles(symbol, candles15m);
       }
-      const candles1h = await marketData.fetchHistorical1h(symbol);
-if (candles1h.length > 0) signalEngine.loadMacroCandles(symbol, candles1h);
     }
 
-    console.log('📊 Indicators warmed up (5min + 15min MTF)\n');
+    // ── LOAD 1H INTO ENGINE FOR MACRO TREND ──
+    for (const symbol of this.watchlist) {
+      try {
+        const candles1h = await this.marketData.fetchHistorical1h(symbol);
+        if (candles1h.length > 0) {
+          this.signalEngine.loadMacroCandles(symbol, candles1h);
+        }
+      } catch (err) {
+        console.warn(`⚠️ Could not load 1h macro candles for ${symbol}: ${err.message}`);
+      }
+    }
 
-    // Wire 5min candle events
+    console.log('📊 Indicators warmed up (5min + 15min MTF + 1h Macro)\n');
+
+    // ── WIRE LIVE CANDLE EVENTS ──
+
+    // 5min candles → signal analysis
     this.marketData.on('candle', (candle) => this.processCandle(candle));
 
-    // Wire 15min candle events into engine
-    this.marketData.on('candle1h', (candle) => {
+    // 15min candles → MTF store
+    this.marketData.on('candle15m', (candle) => {
       this.signalEngine.addMTFCandle(candle);
     });
 
-    // Handle initial 15min load (fires during fetchHistoricalData)
+    // 1h candles → Macro store
+    this.marketData.on('candle1h', (candle) => {
+      this.signalEngine.addMacroCandle(candle);
+    });
+
+    // Handle initial 15min load event
     this.marketData.on('candles15mLoaded', (symbol, candles) => {
       this.signalEngine.loadMTFCandles(symbol, candles);
     });
@@ -248,7 +265,7 @@ if (candles1h.length > 0) signalEngine.loadMacroCandles(symbol, candles1h);
       config: {
         minConfidence: this.minConfidence, minConfluence: this.minConfluence,
         cooldownMins: this.signalCooldown, timeframe: this.timeframe,
-        watchlist: this.watchlist, mtfEnabled: true
+        watchlist: this.watchlist, mtfEnabled: true, macroEnabled: true
       }
     };
   }
