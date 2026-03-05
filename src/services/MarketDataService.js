@@ -6,7 +6,16 @@ export class MarketDataService extends EventEmitter {
     super();
     this.symbols = symbols;
     this.timeframe = this.normalizeTimeframe(timeframe);
-    this.apiKey = process.env.TWELVE_DATA_API_KEY;
+    // ── API KEY ROTATION (up to 3 accounts, falls back on daily limit) ──
+    this.apiKeys = [
+      process.env.TWELVE_DATA_API_KEY,
+      process.env.TWELVE_DATA_API_KEY_2,
+      process.env.TWELVE_DATA_API_KEY_3,
+    ].filter(Boolean);
+    if (this.apiKeys.length === 0) throw new Error("No TwelveData API keys configured!");
+    this.currentKeyIndex = 0;
+    this.keyCredits = new Array(this.apiKeys.length).fill(0);
+    console.log(`🔑 API Key Rotation: ${this.apiKeys.length} key(s) loaded`);
     this.candleBuffers = new Map();
 
     // 15min secondary timeframe buffer
@@ -150,10 +159,18 @@ export class MarketDataService extends EventEmitter {
       this.lastMinuteReset = Date.now();
     }
 
-    if (this.apiCreditsDaily >= this.dailyLimit) {
-      console.log(`🛑 Daily API limit reached (${this.apiCreditsDaily}/${this.dailyLimit}). Pausing until midnight UTC...`);
-      this.emit('dailyLimitReached');
-      return false;
+    if (this.keyCredits[this.currentKeyIndex] >= this.dailyLimit) {
+      const nextIndex = this.apiKeys.findIndex((_, i) => i > this.currentKeyIndex && this.keyCredits[i] < this.dailyLimit);
+      if (nextIndex !== -1) {
+        console.log(`🔑 Key #${this.currentKeyIndex + 1} limit hit (${this.keyCredits[this.currentKeyIndex]}/${this.dailyLimit}). Switching to key #${nextIndex + 1}...`);
+        this.currentKeyIndex = nextIndex;
+        this.minuteCallCount = 0;
+        this.lastMinuteReset = Date.now();
+      } else {
+        console.log(`🛑 All API keys daily limit reached. Pausing until midnight UTC...`);
+        this.emit('dailyLimitReached');
+        return false;
+      }
     }
 
     return true;
@@ -165,19 +182,29 @@ export class MarketDataService extends EventEmitter {
     try {
       this.minuteCallCount++;
       this.apiCreditsDaily++;
+      this.keyCredits[this.currentKeyIndex]++;
 
       const response = await axios.get('https://api.twelvedata.com/time_series', {
-        params: { ...params, apikey: this.apiKey },
+        params: { ...params, apikey: this.apiKeys[this.currentKeyIndex] },
         timeout: 15000
       });
 
       if (response.data.status === 'error') {
         const msg = response.data.message || '';
         if (msg.includes('limit') || msg.includes('exceeded') || msg.includes('429')) {
-          console.warn(`⚠️ API rate limit hit. Waiting 60s...`);
-          await this.sleep(60000);
-          this.minuteCallCount = 0;
-          if (retries < this.maxRetries) return this.apiCall(params, retries + 1);
+          // Try switching to next key first
+          const nextIndex = this.apiKeys.findIndex((_, i) => i > this.currentKeyIndex && this.keyCredits[i] < this.dailyLimit);
+          if (nextIndex !== -1) {
+            console.warn(`⚠️ Key #${this.currentKeyIndex + 1} rate limited. Switching to key #${nextIndex + 1}...`);
+            this.currentKeyIndex = nextIndex;
+            this.minuteCallCount = 0;
+            if (retries < this.maxRetries) return this.apiCall(params, retries + 1);
+          } else {
+            console.warn(`⚠️ All keys rate limited. Waiting 60s...`);
+            await this.sleep(60000);
+            this.minuteCallCount = 0;
+            if (retries < this.maxRetries) return this.apiCall(params, retries + 1);
+          }
         }
         console.error(`❌ API Error: ${msg}`);
         return null;
@@ -452,7 +479,9 @@ export class MarketDataService extends EventEmitter {
 
     setTimeout(() => {
       this.apiCreditsDaily = 0;
-      console.log('🔄 Daily API credit counter reset');
+      this.keyCredits = new Array(this.apiKeys.length).fill(0);
+      this.currentKeyIndex = 0;
+      console.log(`🔄 Daily API credit reset — all ${this.apiKeys.length} key(s) refreshed`);
       this.scheduleDailyReset();
     }, msUntilReset);
 
@@ -465,6 +494,9 @@ export class MarketDataService extends EventEmitter {
       consecutiveErrors: this.consecutiveErrors,
       apiCreditsUsedToday: this.apiCreditsDaily,
       apiCreditsRemaining: this.dailyLimit - this.apiCreditsDaily,
+      activeKeyIndex: this.currentKeyIndex + 1,
+      totalKeys: this.apiKeys.length,
+      keyCredits: this.keyCredits.map((c, i) => ({ key: i + 1, used: c, remaining: this.dailyLimit - c })),
       symbolsTracking: this.symbols.length,
       candleBufferSizes: Object.fromEntries(
         this.symbols.map(s => [s, (this.candleBuffers.get(s) || []).length])
