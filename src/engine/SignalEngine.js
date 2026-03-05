@@ -375,6 +375,42 @@ export class SignalEngine {
       else if (ind.rsi < 70 && ind.rsiPrev >= 70) { sellWeak.push('RSI exiting overbought'); eventSources.add('rsi'); }
     }
 
+    // ─── TRENDING PULLBACK BUY EVENTS (bull trend continuation) ───
+    // Fires when price dips and recovers in a confirmed bull trend.
+    // Fills the signal gap when initial crossovers have already fired days ago.
+
+    // 1) EMA21 Reclaim — price was below EMA21, now back above (pullback bounce)
+    if (!eventSources.has('ema_bounce') && ind.price > ind.ema21 && ind.prevPrice <= ind.ema21
+        && ind.ema9 > ind.ema21 && ind.ema21 > ind.ema50) {
+      buyWeak.push('Price reclaimed EMA21 (pullback bounce in bull trend)');
+      eventSources.add('ema_bounce');
+    }
+
+    // 2) RSI Pullback Recovery — RSI dipped into 42-58 zone (bull trend pullback) and is now rising
+    if (!eventSources.has('rsi_pullback') && ind.rsi > ind.rsiPrev
+        && ind.rsi >= 42 && ind.rsi <= 58 && ind.price > ind.ema50
+        && ind.ema9 > ind.ema50) {
+      buyWeak.push('RSI recovering from pullback zone (trend continuation)');
+      eventSources.add('rsi_pullback');
+    }
+
+    // 3) MACD Histogram Reversal — histogram was falling, now turning up while still positive
+    if (!eventSources.has('macd') && ind.macd && ind.macdPrev && ind.macdPrev2) {
+      const histNowRising = ind.macd.histogram > ind.macdPrev.histogram;
+      const histWasFalling = ind.macdPrev.histogram < ind.macdPrev2.histogram;
+      if (histNowRising && histWasFalling && ind.macd.histogram > 0 && ind.price > ind.ema21) {
+        buyWeak.push('MACD histogram turning up from pullback');
+        eventSources.add('macd_reversal');
+      }
+      // Mirror for SELL
+      const histNowFalling = ind.macd.histogram < ind.macdPrev.histogram;
+      const histWasRising = ind.macdPrev.histogram > ind.macdPrev2.histogram;
+      if (histNowFalling && histWasRising && ind.macd.histogram < 0 && ind.price < ind.ema21) {
+        sellWeak.push('MACD histogram turning down from bounce');
+        eventSources.add('macd_reversal');
+      }
+    }
+
     // ─── STATE SIGNALS ───
 
     if (!eventSources.has('ema')) {
@@ -427,11 +463,17 @@ export class SignalEngine {
 
     if (ind.stoch) {
       if (ind.stoch.k < 25) conflicts.push({ blocks: 'SELL', reason: `Stoch oversold (${ind.stoch.k.toFixed(0)})` });
-      if (ind.stoch.k > 75) conflicts.push({ blocks: 'BUY', reason: `Stoch overbought (${ind.stoch.k.toFixed(0)})` });
+      // Only block BUY when stoch overbought in a WEAK/RANGING trend — in trending markets, overbought = momentum
+      if (ind.stoch.k > 75 && adxValue < 28) conflicts.push({ blocks: 'BUY', reason: `Stoch overbought (${ind.stoch.k.toFixed(0)}) in weak trend` });
+      // Still block BUY on extreme overbought (>88) regardless of trend
+      if (ind.stoch.k > 88) conflicts.push({ blocks: 'BUY', reason: `Stoch extreme overbought (${ind.stoch.k.toFixed(0)})` });
     }
 
     if (ind.rsi < 30) conflicts.push({ blocks: 'SELL', reason: `RSI oversold (${ind.rsi.toFixed(0)})` });
-    if (ind.rsi > 70) conflicts.push({ blocks: 'BUY', reason: `RSI overbought (${ind.rsi.toFixed(0)})` });
+    // Only block BUY when RSI overbought in a WEAK/RANGING trend — in trending bull markets RSI stays elevated
+    if (ind.rsi > 70 && adxValue < 28) conflicts.push({ blocks: 'BUY', reason: `RSI overbought (${ind.rsi.toFixed(0)}) in weak trend` });
+    // Still block BUY on extreme RSI (>80) regardless
+    if (ind.rsi > 80) conflicts.push({ blocks: 'BUY', reason: `RSI extreme overbought (${ind.rsi.toFixed(0)})` });
 
     if (ind.macd && !eventSources.has('macd')) {
       const histThreshold = currentPrice * 0.0001;
