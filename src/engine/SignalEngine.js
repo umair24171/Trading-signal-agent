@@ -461,6 +461,8 @@ export class SignalEngine {
     // CONFLICT DETECTION
     // ═══════════════════════════════════════════════════════════
 
+    const adxValue = ind.adx?.adx || 0;
+
     if (ind.stoch) {
       if (ind.stoch.k < 25) conflicts.push({ blocks: 'SELL', reason: `Stoch oversold (${ind.stoch.k.toFixed(0)})` });
       // Only block BUY when stoch overbought in a WEAK/RANGING trend — in trending markets, overbought = momentum
@@ -521,7 +523,6 @@ export class SignalEngine {
       }
     }
 
-    const adxValue = ind.adx?.adx || 0;
     if (adxValue < 28) {
       const hasExtremeRSI = ind.rsi < 30 || ind.rsi > 70;
       const hasExtremeStoch = ind.stoch && (ind.stoch.k < 20 || ind.stoch.k > 80);
